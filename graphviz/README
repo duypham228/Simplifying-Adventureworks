@@ -1,3 +1,14 @@
 Graphviz related materials will be added later.
 
+https://graphviz.org/
+
+schema.dot : a DOT script that was generated from the DB tables.
+
+- You can use the "dot" command from the graphviz package to convert the
+  above script into a pdf file
+
+  dot -Tpdf -o schema.pdf schema.dot
+
+schema.pdt : resulting pdf file
+
 
