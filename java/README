@@ -1,0 +1,29 @@
+Run
+
+	make all
+
+to compile.
+
+Run
+
+	java Gui
+	java JdbcExample
+
+etc. to run.
+
+For JDBC, install libmysql-java 
+
+	* Ubuntu Linux (other distros may be similar)
+
+	sudo apt install libmysql-java
+	export CLASSPATH=$CLASSPATH:/usr/share/java/mysql-connector-java.jar
+
+	* OSX / windows
+	
+	1. download from https://dev.mysql.com/downloads/connector/j/
+
+	2. follow instructions in 
+
+	https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-installing.html 	
+	
+
