@@ -11,7 +11,6 @@
 *
 */
 
-
 package main;
 
 
@@ -27,8 +26,9 @@ public class CommandInterface {
 	static String userline = "";
 	
 	public static void main(String[]args) {
+		System.out.println("testing");
 		Scanner input = new Scanner(System.in);
-		while(!userline.equalsIgnoreCase("quit")&&!!userline.equalsIgnoreCase("exit")) {
+		while(!userline.equalsIgnoreCase("quit")&&!userline.equalsIgnoreCase("exit")) {
 			System.out.print("jdb >");
 			userline = input.nextLine();
 			System.out.println(parseLine(userline)); //Formatting could either be done here w/ function or in the dbmanager.
