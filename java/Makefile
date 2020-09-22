@@ -1,5 +1,3 @@
-# Choe 
-
 %.class: %.java
 	javac $<
 
