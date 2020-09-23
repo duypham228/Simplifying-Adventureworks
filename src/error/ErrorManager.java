@@ -8,7 +8,7 @@ public final class ErrorManager {
 		//Missing semicolon
 		//etc.
 	};
-	public String getErrorMessage(int error) {
+	public static String getErrorMessage(int error) {
 		try{
 			return "Error "+error+": "+errorMessages[error];
 		}
