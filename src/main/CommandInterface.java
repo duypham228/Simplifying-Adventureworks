@@ -11,6 +11,7 @@
 *
 */
 
+
 package main;
 
 
@@ -26,10 +27,9 @@ public class CommandInterface {
 	static String userline = "";
 	
 	public static void main(String[]args) {
-		System.out.println("testing");
 		Scanner input = new Scanner(System.in);
 		while(!userline.equalsIgnoreCase("quit")&&!userline.equalsIgnoreCase("exit")) {
-			System.out.print("jdb >");
+			System.out.print("jdb > ");
 			userline = input.nextLine();
 			System.out.println(parseLine(userline)); //Formatting could either be done here w/ function or in the dbmanager.
 		}
@@ -37,11 +37,16 @@ public class CommandInterface {
 	}
 	
 	final static String parseLine(String line) {
-		if(!line.substring(0,3).equals("jdb")) {
-			return DatabaseManager.handleCustomCommand(line);
+		try{
+			if(!line.substring(0,3).equals("jdb")) {
+				return DatabaseManager.handleCustomCommand(line);
+			}
+			else {
+				return DatabaseManager.handleSQLCommand(line);
+			}
 		}
-		else {
-			return DatabaseManager.handleSQLCommand(line);
+		catch(StringIndexOutOfBoundsException e) {
+			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 		}
 	}
 	
