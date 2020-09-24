@@ -66,7 +66,7 @@ public final class DatabaseManager {
 		if(result == null) {
 			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 		}
-		return ""; //TODO:implement function
+		return "There was a problem with your SQL Query"; //TODO:implement function
 	}
 
 	public static ResultSet queryDatabase(String command) {
@@ -99,10 +99,11 @@ public final class DatabaseManager {
 		
 		
 		//TODO:FORM SQL COMMAND HERE.
-		String newcommand = "special command replaced with sql and custom tables and other fields";
+		String newcommand = "select * from address;";
 		return interpretResultSet(queryDatabase(newcommand));
 		
 	}
+	
 	public static String handleSQLCommand(String command) {
 		return interpretResultSet(queryDatabase(command));
 	}
