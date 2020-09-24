@@ -31,7 +31,9 @@ public class CommandInterface {
 		while(!userline.equalsIgnoreCase("quit")&&!userline.equalsIgnoreCase("exit")) {
 			System.out.print("jdb > ");
 			userline = input.nextLine();
-			System.out.println(parseLine(userline)); //Formatting could either be done here w/ function or in the dbmanager.
+			if(!userline.equalsIgnoreCase("quit")&&!userline.equalsIgnoreCase("exit")) {
+				System.out.println(parseLine(userline)); //Formatting could either be done here w/ function or in the dbmanager.
+			}
 		}
 		input.close();
 	}
