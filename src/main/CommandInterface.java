@@ -27,6 +27,7 @@ public class CommandInterface {
 	static String userline = "";
 	
 	public static void main(String[]args) {
+		DatabaseManager.openConnection();
 		Scanner input = new Scanner(System.in);
 		while(!userline.equalsIgnoreCase("quit")&&!userline.equalsIgnoreCase("exit")) {
 			System.out.print("jdb > ");
@@ -36,6 +37,7 @@ public class CommandInterface {
 			}
 		}
 		input.close();
+		DatabaseManager.closeConnection();
 	}
 	
 	final static String parseLine(String line) {

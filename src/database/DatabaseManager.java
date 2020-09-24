@@ -117,4 +117,26 @@ public final class DatabaseManager {
 		}
 	}
 	
+	public static void openConnection() {
+		try {
+			//FIXME: I really don't think this is a good way to do it, but online tutorials do it?
+			Class.forName("com.mysql.jdbc.Driver").newInstance(); 			
+			
+			db = DriverManager.getConnection("jdbc:mysql://localhost/?user=root&password=password"); //TODO: make sure this url is right
+			
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
