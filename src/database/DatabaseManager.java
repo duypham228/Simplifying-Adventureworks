@@ -10,7 +10,6 @@ package database;
 	import java.sql.Connection;
 	import java.sql.DriverManager;
 	import java.sql.SQLException;
-
 	import java.sql.ResultSet;
 
 public final class DatabaseManager {
@@ -106,6 +105,15 @@ public final class DatabaseManager {
 	}
 	public static String handleSQLCommand(String command) {
 		return interpretResultSet(queryDatabase(command));
+	}
+	
+	public static void closeConnection() {
+		try {
+			db.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
