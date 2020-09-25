@@ -63,31 +63,34 @@ public final class DatabaseManager {
 	}
 	
 	//Neatly formats results into a string for printing. Could be an error, actual query, etc.
-	private static String interpretResultSet(ResultSet rs) {
-		String output = "There was a problem in interpretResultSet";
-		if(rs == null) {
-			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
-		}
+	@SuppressWarnings("unchecked")
+	private static ArrayList<HashMap<String, Object>> interpretResultSet(ResultSet rs) {
+		//String output = "";
+		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>(100);
+//		if(rs == null) {
+//			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+//		}
 		try { //TODO:implement function
 			ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
-			ArrayList list = new ArrayList(100);
 			while (rs.next()){
-				HashMap row = new HashMap(columns);
-			    for(int i=1; i<=columns; ++i){           
-			    	row.put(md.getColumnName(i),rs.getObject(i));
+				HashMap<String, Object> row = new HashMap<String, Object>(columns);
+			    for(int i=1; i<=columns; i++){
+			    	row.put(md.getColumnName(i), rs.getObject(i));
 			    }
 			    list.add(row);
 			}
-			for(int i=0; i<list.size(); i++) {
-				output+=list.get(i) + "\n";
-			}
-			return output;
+			return list;
+//			for(int i=0; i<list.size(); i++) {
+//				output+=list.get(i) + "\n";
+//			}
+//			return output;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return output;
+		//output = "There was a problem in interpretResultSet.";
+		return list;
 	}
 
 	
@@ -122,15 +125,29 @@ public final class DatabaseManager {
 		//TODO:FORM SQL COMMAND HERE.
 		String newcommand = "select * from address;"; //example query to test
 		ResultSet rs = queryDatabase(newcommand);
-		return interpretResultSet(rs);
+		//return interpretResultSet(rs);
+		return "this needs fixing";
 	}
 	
 	
 	
 	public static String handleSQLCommand(String command) {
-		String test = "select * from address;"; //example query to test
+		if(command.equals("jdb")) {
+			System.out.println("Command: " + command);
+			ArrayList<HashMap <String, Object>> tables = interpretResultSet(queryDatabase("show tables;"));
+			for(int i=0; i<tables.size(); i++) {
+				System.out.println(tables.get(i));
+				String tableName = tables.get(i).get("TABLE_NAME").toString(); 
+				ArrayList <HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+tableName+";"));
+				for(int j=0; j<attributes.size(); j++) {
+					System.out.println(attributes.get(j));
+				}
+			}
+		}
+		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
 		System.out.println("Command: " + test);
-		return interpretResultSet(queryDatabase(test));
+		//return interpretResultSet(queryDatabase(test));
+		return "Done.";
 	}
 	
 	
