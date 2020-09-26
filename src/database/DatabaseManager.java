@@ -110,17 +110,48 @@ public final class DatabaseManager {
 	//Could also send it straight here to some intermediate function like "handleline" which makes the decision instead of main
 	public static String handleCustomCommand(String command) {
 		boolean validCommandPrefix = false;
+		int customCommandLength = 0, commandIndex = 0, commandLength = command.length();
 		out:
 		for(int i=0;i<customCommands.length;i++) {
-			if(command.length()>=customCommands[i].length()) {
-				if(command.substring(0,customCommands[i].length()).equals(customCommands[i])) {
+			customCommandLength = customCommands[i].length();
+			if(commandLength>=customCommandLength) {
+				if(command.substring(0,customCommandLength).equals(customCommands[i])) {
 					validCommandPrefix = true;
+					commandIndex = i;
 					break out;
 				}
 			}		
 		}
 		if(!validCommandPrefix) {
 			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+		}
+		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
+		switch(commandIndex) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			String table = command.substring(customCommandLength, commandLength - customCommandLength);
+			break;
+		case 8:
+			break;
+		case 9:
+			break;
+		case 10:
+			break;
+		case 11:
+			break;
 		}
 		//TODO:FORM SQL COMMAND HERE.
 		String newcommand = "select * from address;"; //example query to test
