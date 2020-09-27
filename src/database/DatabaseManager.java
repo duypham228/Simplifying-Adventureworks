@@ -213,6 +213,37 @@ public final class DatabaseManager {
 			}
 			break;
 		case 8:
+			String region = command.substring(customCommandLength + 1, commandLength);
+			String newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
+					+ "'Contact' from countryregion where countryregion.CountryRegionCode LIKE '?$' union select "
+					+ "countryregion.CountryRegionCode, countryregion.Name, countryregioncurrency.CurrencyCode, 'TaxRate', "
+					+ "'Contact' from countryregion join countryregioncurrency on countryregion.CountryRegionCode = "
+					+ "countryregioncurrency.CountryRegionCode where countryregion.CountryRegionCode LIKE '?$' union "
+					+ "select countryregion.CountryRegionCode, countryregion.Name, countryregioncurrency.CurrencyCode, "
+					+ "salestaxrate.TaxRate AS 'TaxRate', salesorderheader.ContactID AS 'Contact' from countryregion join "
+					+ "countryregioncurrency on countryregion.CountryRegionCode = countryregioncurrency.CountryRegionCode "
+					+ "join stateprovince on stateprovince.CountryRegionCode = countryregion.CountryRegionCode join salestaxrate "
+					+ "on salestaxrate.StateProvinceID = stateprovince.StateProvinceID join salesterritory on "
+					+ "salesterritory.CountryRegionCode = countryregion.CountryRegionCode join salesorderheader on "
+					+ "salesorderheader.TerritoryID = salesterritory.TerritoryID where countryregion.CountryRegionCode "
+					+ "LIKE 'AE' union select countryregion.CountryRegionCode, countryregion.Name, "
+					+ "countryregioncurrency.CurrencyCode, salestaxrate.TaxRate AS 'TaxRate', salesorderheader.ContactID "
+					+ "AS 'Contact' from countryregion join countryregioncurrency on countryregion.CountryRegionCode = "
+					+ "countryregioncurrency.CountryRegionCode join stateprovince on stateprovince.CountryRegionCode = "
+					+ "countryregion.CountryRegionCode join salestaxrate on salestaxrate.StateProvinceID = "
+					+ "stateprovince.StateProvinceID join salesterritory on salesterritory.CountryRegionCode = "
+					+ "countryregion.CountryRegionCode join salesorderheader on salesorderheader.TerritoryID = "
+					+ "salesterritory.TerritoryID where countryregion.CountryRegionCode LIKE '?$'";
+			newcommand = newcommand.replace('?', region.charAt(0));
+			newcommand = newcommand.replace('$', region.charAt(1));
+			ResultSet rs = queryDatabase(newcommand);
+			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+			int rowsreturned = 0;
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+				rowsreturned = i + 1;
+			}
+			return Integer.toString(rowsreturned) + " rows returned";
 			break;
 		case 9:
 			break;
