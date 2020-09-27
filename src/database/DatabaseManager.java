@@ -2,7 +2,8 @@ package database;
 
 //Standard Library Imports
 	import java.util.HashMap;
-	import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.ArrayList;
 	import java.util.Arrays;
 	
 //Manager Imports
@@ -65,7 +66,6 @@ public final class DatabaseManager {
 	//Neatly formats results into a string for printing. Could be an error, actual query, etc.
 	@SuppressWarnings("unchecked")
 	private static ArrayList<HashMap<String, Object>> interpretResultSet(ResultSet rs) {
-		//String output = "";
 		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>(100);
 //		if(rs == null) {
 //			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
@@ -81,15 +81,10 @@ public final class DatabaseManager {
 			    list.add(row);
 			}
 			return list;
-//			for(int i=0; i<list.size(); i++) {
-//				output+=list.get(i) + "\n";
-//			}
-//			return output;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//output = "There was a problem in interpretResultSet.";
 		return list;
 	}
 
@@ -127,14 +122,24 @@ public final class DatabaseManager {
 		}
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
-		case 0:
-			ArrayList<HashMap <String, Object>> tables = interpretResultSet(queryDatabase("show tables;"));
-			for(int i=0; i<tables.size(); i++) {
-				System.out.println(tables.get(i));
-				String tableName = tables.get(i).get("TABLE_NAME").toString(); 
-				ArrayList <HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+tableName+";"));
+		case 0:		//"jdb-show-related-tables",
+			Scanner input = new Scanner(System.in);
+			System.out.print("Enter the tablename :: ");
+			String input_table_name = input.nextLine();
+			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
+			ArrayList<String> primaryKeys = new ArrayList<String>(5);
+			for(int i=0; i<input_table.size(); i++) {	//gets primary keys
+				if(input_table.get(i).get("COLUMN_KEY").equals("PRI")) {
+					primaryKeys.add(input_table.get(i).get("COLUMN_NAME").toString());
+				}
+			}
+			ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
+			ArrayList<String> relatedTables = new ArrayList<String>(10);
+			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+				String curr_table_name = all_tables.get(i).get("COLUMN_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {
-					System.out.println(attributes.get(j));
+					
 				}
 			}
 			break;
@@ -166,7 +171,7 @@ public final class DatabaseManager {
 		String newcommand = "select * from address;"; //example query to test
 		ResultSet rs = queryDatabase(newcommand);
 		//return interpretResultSet(rs);
-		return "this needs fixing";
+		return "Done.";
 	}
 	
 	
