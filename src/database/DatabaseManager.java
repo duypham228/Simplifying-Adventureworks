@@ -123,7 +123,7 @@ public final class DatabaseManager {
 	
 		ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
 		ArrayList<String> primaryKeys = new ArrayList<String>(5);
-		String output = "";
+		String output = "\n";
 		
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
