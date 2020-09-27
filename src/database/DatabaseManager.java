@@ -127,6 +127,7 @@ public final class DatabaseManager {
 		String newcommand = "";
 		ArrayList<HashMap<String, Object>> result;
 		ResultSet rs;
+		output = "\n";
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
 		case 0:		//"jdb-show-related-tables",
