@@ -142,7 +142,75 @@ public final class DatabaseManager {
 		case 6:
 			break;
 		case 7:
-			String table = command.substring(customCommandLength, commandLength - customCommandLength);
+			String table = command.substring(customCommandLength + 1, commandLength);
+			System.out.println(table);
+			if (table.equals("address")) {
+				String newcommand = "select address.AddressID, address.AddressLine1, address.AddressLine2, "
+						+ "address.City, address.StateProvinceID, address.PostalCode, customeraddress.CustomerID"
+						+ " AS 'CustomerID/VendorID', customer.AccountNumber AS 'AccountNumber', addresstype.AddressTypeID"
+						+ " AS 'AddressTypeID', addresstype.Name AS 'BuildingType' from address join customeraddress"
+						+ " on customeraddress.AddressID = address.AddressID  join addresstype on addresstype.AddressTypeID"
+						+ " = customeraddress.AddressTypeID join customer on customeraddress.CustomerID = "
+						+ "customer.CustomerID union select address.AddressID, address.AddressLine1, address.AddressLine2,"
+						+ " address.City, address.StateProvinceID, address.PostalCode, vendoraddress.VendorID AS "
+						+ "'CustomerID/VendorID', vendor.AccountNumber AS 'AccountNumber', addresstype.AddressTypeID"
+						+ " AS 'AddressTypeID', addresstype.Name AS 'BuildingType' from address join vendoraddress on"
+						+ " vendoraddress.AddressID = address.AddressID join addresstype on addresstype.AddressTypeID"
+						+ " = vendoraddress.AddressTypeID join vendor on vendoraddress.VendorID = vendor.VendorID";
+				ResultSet rs = queryDatabase(newcommand);
+				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				int rowsreturned = 0;
+				for (int i = 0; i < result.size(); i++) {
+					System.out.println(result.get(i));
+					rowsreturned = i;
+				}
+				return Integer.toString(rowsreturned) + " rows returned";
+			}
+			else if (table.equals("customeraddress")) {
+				String newcommand = "select customeraddress.AddressID, address.AddressLine1, address.AddressLine2, "
+						+ "address.City, address.StateProvinceID, address.PostalCode, customer.CustomerID, "
+						+ "customer.AccountNumber, customer.CustomerType, addresstype.AddressTypeID, addresstype.Name "
+						+ "from customeraddress join address on customeraddress.AddressID = address.AddressID join "
+						+ "customer on customer.CustomerID = customeraddress.CustomerID join addresstype on "
+						+ "addresstype.AddressTypeID = customeraddress.AddressTypeID";
+				ResultSet rs = queryDatabase(newcommand);
+				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				int rowsreturned = 0;
+				for (int i = 0; i < result.size(); i++) {
+					System.out.println(result.get(i));
+					rowsreturned = i;
+				}
+				return Integer.toString(rowsreturned) + " rows returned";
+			}
+			else if (table.equals("vendoraddress")) {
+				String newcommand = "select vendoraddress.AddressID, address.AddressLine1, address.AddressLine2, "
+						+ "address.City, address.StateProvinceID, address.PostalCode, vendor.VendorID, "
+						+ "vendor.AccountNumber, vendor.Name, addresstype.AddressTypeID, addresstype.Name AS "
+						+ "'BuildingName' from vendoraddress join address on vendoraddress.AddressID = address.AddressID"
+						+ " join vendor on vendor.VendorID = vendoraddress.VendorID join addresstype on "
+						+ "addresstype.AddressTypeID = vendoraddress.AddressTypeID";
+				ResultSet rs = queryDatabase(newcommand);
+				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				int rowsreturned = 0;
+				for (int i = 0; i < result.size(); i++) {
+					System.out.println(result.get(i));
+					rowsreturned = i;
+				}
+				return Integer.toString(rowsreturned) + " rows returned";
+			}
+			else if (table.equals("employeeaddress")) {
+				String newcommand = "select employeeaddress.EmployeeID, employeeaddress.AddressID, address.AddressLine1,"
+						+ " address.AddressLine2, address.City, address.StateProvinceID, address.PostalCode from "
+						+ "employeeaddress join address on address.AddressID = employeeaddress.AddressID";
+				ResultSet rs = queryDatabase(newcommand);
+				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				int rowsreturned = 0;
+				for (int i = 0; i < result.size(); i++) {
+					System.out.println(result.get(i));
+					rowsreturned = i;
+				}
+				return Integer.toString(rowsreturned) + " rows returned";
+			}
 			break;
 		case 8:
 			break;
