@@ -2,7 +2,8 @@ package database;
 
 //Standard Library Imports
 	import java.util.HashMap;
-	import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.ArrayList;
 	import java.util.Arrays;
 	
 //Manager Imports
@@ -65,7 +66,6 @@ public final class DatabaseManager {
 	//Neatly formats results into a string for printing. Could be an error, actual query, etc.
 	@SuppressWarnings("unchecked")
 	private static ArrayList<HashMap<String, Object>> interpretResultSet(ResultSet rs) {
-		//String output = "";
 		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>(100);
 //		if(rs == null) {
 //			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
@@ -81,15 +81,10 @@ public final class DatabaseManager {
 			    list.add(row);
 			}
 			return list;
-//			for(int i=0; i<list.size(); i++) {
-//				output+=list.get(i) + "\n";
-//			}
-//			return output;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//output = "There was a problem in interpretResultSet.";
 		return list;
 	}
 
@@ -125,11 +120,58 @@ public final class DatabaseManager {
 		if(!validCommandPrefix) {
 			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 		}
+	
+		ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
+		ArrayList<String> primaryKeys = new ArrayList<String>(5);
+		String output = "";
+		
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
-		case 0:
+		case 0:		//"jdb-show-related-tables",
+			Scanner input = new Scanner(System.in);
+			System.out.print("Enter the tablename :: ");
+			String input_table_name = input.nextLine();
+			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
+			for(int i=0; i<input_table.size(); i++) {	//gets primary keys
+				if(input_table.get(i).get("COLUMN_KEY").equals("PRI")) {
+					primaryKeys.add(input_table.get(i).get("COLUMN_NAME").toString());
+				}
+			}
+			ArrayList<String> relatedTables = new ArrayList<String>(10);
+			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					HashMap<String, Object> curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						for(int k=0; k<primaryKeys.size(); k++) {	//loops through primaryKeys testing for match
+							if(primaryKeys.get(k).equals(curr_attr.get("COLUMN_NAME").toString())) {
+								relatedTables.add(curr_table_name);
+							}
+						}
+					}
+				}
+			}
+			for(int i=0; i<relatedTables.size(); i++) {
+				output += relatedTables.get(i) + "\n";
+			}
+			System.out.println(output);
 			break;
-		case 1:
+		case 1:	//jdb-show-all-primary-keys
+			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					HashMap<String, Object> curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+			}
+			for(int i=0; i<primaryKeys.size(); i++) {
+				output += primaryKeys.get(i) + "\n";
+			}
+			System.out.println(output);
 			break;
 		case 2:
 			break;
@@ -141,7 +183,7 @@ public final class DatabaseManager {
 			break;
 		case 6:
 			break;
-		case 7:
+		case 7: //jdb-get-addresses
 			String table = command.substring(customCommandLength + 1, commandLength);
 			System.out.println(table);
 			if (table.equals("address")) {
@@ -159,12 +201,10 @@ public final class DatabaseManager {
 						+ " = vendoraddress.AddressTypeID join vendor on vendoraddress.VendorID = vendor.VendorID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
-					System.out.println(result.get(i));
-					rowsreturned = i;
+					output += result.get(i);
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
+				return output;
 			}
 			else if (table.equals("customeraddress")) {
 				String newcommand = "select customeraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -175,12 +215,10 @@ public final class DatabaseManager {
 						+ "addresstype.AddressTypeID = customeraddress.AddressTypeID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
-					System.out.println(result.get(i));
-					rowsreturned = i;
+					output += result.get(i);
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
+				return output;
 			}
 			else if (table.equals("vendoraddress")) {
 				String newcommand = "select vendoraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -191,12 +229,10 @@ public final class DatabaseManager {
 						+ "addresstype.AddressTypeID = vendoraddress.AddressTypeID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
-					System.out.println(result.get(i));
-					rowsreturned = i;
+					output += result.get(i);
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
+				return output;
 			}
 			else if (table.equals("employeeaddress")) {
 				String newcommand = "select employeeaddress.EmployeeID, employeeaddress.AddressID, address.AddressLine1,"
@@ -204,15 +240,13 @@ public final class DatabaseManager {
 						+ "employeeaddress join address on address.AddressID = employeeaddress.AddressID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
-					System.out.println(result.get(i));
-					rowsreturned = i;
+					output += result.get(i);
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
+				return output;
 			}
 			break;
-		case 8:
+		case 8: //jdb-get-region-info
 			String region = command.substring(customCommandLength + 1, commandLength);
 			String newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
 					+ "'Contact' from countryregion where countryregion.CountryRegionCode LIKE '?$' union select "
@@ -238,13 +272,10 @@ public final class DatabaseManager {
 			newcommand = newcommand.replace('$', region.charAt(1));
 			ResultSet rs = queryDatabase(newcommand);
 			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-			int rowsreturned = 0;
 			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-				rowsreturned = i + 1;
+				output += result.get(i);
 			}
-			return Integer.toString(rowsreturned) + " rows returned";
-			break;
+			return output;
 		case 9:
 			break;
 		case 10:
@@ -256,7 +287,7 @@ public final class DatabaseManager {
 		String newcommand = "select * from address;"; //example query to test
 		ResultSet rs = queryDatabase(newcommand);
 		//return interpretResultSet(rs);
-		return "this needs fixing";
+		return "Done.";
 	}
 	
 	
@@ -277,7 +308,22 @@ public final class DatabaseManager {
 		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
 		System.out.println("Command: " + test);
 		//return interpretResultSet(queryDatabase(test));
-		return "Done.";
+		//return "Done.";
+		String output = "";
+		if(command.equals("help")) {
+			output+="Available Commands :: \n";
+			for(int i=0; i<customCommands.length; i++) {
+				output+="\t" + customCommands[i]+"\n";
+			}
+			output+= "\tOR you can enter a direct SQL query.";
+		}
+		else {
+			ArrayList<HashMap <String, Object>> rsList = interpretResultSet(queryDatabase(command));
+			for(int i=0; i<rsList.size(); i++) {
+				output+= rsList + "\n";
+			}
+		}
+		return output;
 	}
 	
 	
