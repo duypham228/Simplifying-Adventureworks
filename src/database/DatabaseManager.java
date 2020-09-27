@@ -262,6 +262,24 @@ public final class DatabaseManager {
 		case 9:
 			break;
 		case 10:
+			String[] tmp = command.split(" ");
+			if(tmp.length!=2){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			String newcommand = "SELECT purchaseorderheader.OrderDate,"
+				+"purchaseorderheader.ShipDate-purchaseorderheader.OrderDate AS OrderToShip,"
+				+"purchaseorderheader.ShipDate,"
+				+"purchaseorderdetail.DueDate-purchaseorderheader.ShipDate AS ShipToFinish,"
+				+"purchaseorderdetail.DueDate "
+				+"WHERE purchaseorderheader.PurchaseOrderID="+tmp[1]
+				+"AND purchaseorderdetail.PurchaseOrderID="+tmp[1];
+			ResultSet rs = queryDatabase(newcommand);
+			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
+			System.out.println(result.get(0)+" ===== "+ result.get(1) + "DAYS ===== "+ result.get(2) + " ===== " 
+					   + result.get(3) + "DAYS ====== "+ result.get(4));
 			break;
 		case 11:
 			break;
