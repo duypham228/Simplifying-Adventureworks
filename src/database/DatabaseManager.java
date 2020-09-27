@@ -272,6 +272,16 @@ public final class DatabaseManager {
 			}
 			break;
 		case "jdb-get-info-by-name":
+			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					HashMap<String, Object> curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+			}
 			break;
 		case "jdb-get-schedule":
 			if(parsedValues.length!=2){
