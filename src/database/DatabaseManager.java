@@ -185,7 +185,6 @@ public final class DatabaseManager {
 			break;
 		case 7: //jdb-get-addresses
 			String table = command.substring(customCommandLength + 1, commandLength);
-			System.out.println(table);
 			if (table.equals("address")) {
 				String newcommand = "select address.AddressID, address.AddressLine1, address.AddressLine2, "
 						+ "address.City, address.StateProvinceID, address.PostalCode, customeraddress.CustomerID"
@@ -202,9 +201,8 @@ public final class DatabaseManager {
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
 				for (int i = 0; i < result.size(); i++) {
-					output += result.get(i);
+					System.out.println(result.get(i));
 				}
-				return output;
 			}
 			else if (table.equals("customeraddress")) {
 				String newcommand = "select customeraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -216,9 +214,8 @@ public final class DatabaseManager {
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
 				for (int i = 0; i < result.size(); i++) {
-					output += result.get(i);
+					System.out.println(result.get(i));
 				}
-				return output;
 			}
 			else if (table.equals("vendoraddress")) {
 				String newcommand = "select vendoraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -230,9 +227,8 @@ public final class DatabaseManager {
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
 				for (int i = 0; i < result.size(); i++) {
-					output += result.get(i);
+					System.out.println(result.get(i));
 				}
-				return output;
 			}
 			else if (table.equals("employeeaddress")) {
 				String newcommand = "select employeeaddress.EmployeeID, employeeaddress.AddressID, address.AddressLine1,"
@@ -241,9 +237,8 @@ public final class DatabaseManager {
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
 				for (int i = 0; i < result.size(); i++) {
-					output += result.get(i);
+					System.out.println(result.get(i));
 				}
-				return output;
 			}
 			break;
 		case 8: //jdb-get-region-info
@@ -273,9 +268,9 @@ public final class DatabaseManager {
 			ResultSet rs = queryDatabase(newcommand);
 			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
-				output += result.get(i);
+				System.out.println(result.get(i));
 			}
-			return output;
+			break;
 		case 9:
 			break;
 		case 10:
