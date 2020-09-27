@@ -2,9 +2,7 @@ package database;
 
 //Standard Library Imports
 	import java.util.HashMap;
-import java.util.Scanner;
-import java.util.ArrayList;
-	import java.util.Arrays;
+	import java.util.ArrayList;
 	
 //Manager Imports
 	import error.ErrorManager;
@@ -104,23 +102,27 @@ public final class DatabaseManager {
 	
 	//Could also send it straight here to some intermediate function like "handleline" which makes the decision instead of main
 	public static String handleCustomCommand(String command) {
+		String[] parsedValues = command.split(" ");
 		boolean validCommandPrefix = false;
-		int customCommandLength = 0, commandIndex = 0, commandLength = command.length();
+		
+		if(parsedValues.length ==0) {
+			return ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
+		}
+		
 		out:
 		for(int i=0; i<customCommands.length;i++) {
-			customCommandLength = customCommands[i].length();
-			if(commandLength>=customCommandLength) {
-				if(command.substring(0,customCommandLength).equals(customCommands[i])) {
-					validCommandPrefix = true;
-					commandIndex = i;
-					break out;
-				}
+			if(parsedValues[0].equals(customCommands[i])) {
+				validCommandPrefix = true;
+				break out;
 			}		
 		}
+		
 		if(!validCommandPrefix) {
 			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 		}
 	
+		
+		
 		ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
 		ArrayList<String> primaryKeys = new ArrayList<String>(5);
 		String output = "";
@@ -129,11 +131,12 @@ public final class DatabaseManager {
 		ResultSet rs;
 		output = "\n";
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
-		switch(commandIndex) {
-		case 0:		//"jdb-show-related-tables",
-			Scanner input = new Scanner(System.in);
-			System.out.print("Enter the tablename :: ");
-			String input_table_name = input.nextLine();
+		switch(parsedValues[0]) {
+		case "jdb-show-related-tables":
+			if(parsedValues.length!=2){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			String input_table_name = parsedValues[1];
 			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
 			for(int i=0; i<input_table.size(); i++) {	//gets primary keys
 				if(input_table.get(i).get("COLUMN_KEY").equals("PRI")) {
@@ -160,7 +163,10 @@ public final class DatabaseManager {
 			}
 			System.out.println(output);
 			break;
-		case 1:	//jdb-show-all-primary-keys
+		case "jdb-show-all-primary-keys":
+			if(parsedValues.length!=1){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
 				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
@@ -176,18 +182,21 @@ public final class DatabaseManager {
 			}
 			System.out.println(output);
 			break;
-		case 2:
+		case "jdb-find-column":
 			break;
-		case 3:
+		case "jdb-search-path":
 			break;
-		case 4:
+		case "jdb-search-and-join":
 			break;
-		case 5:
+		case "jdb-get-view":
 			break;
-		case 6:
+		case "jdb-stat":
 			break;
-		case 7: //jdb-get-addresses
-			String table = command.substring(customCommandLength + 1, commandLength);
+		case "jdb-get-addresses":
+			if(parsedValues.length!=2){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			String table = parsedValues[1];
 			if (table.equals("address")) {
 				newcommand = "select address.AddressID, address.AddressLine1, address.AddressLine2, "
 						+ "address.City, address.StateProvinceID, address.PostalCode, customeraddress.CustomerID"
@@ -229,8 +238,11 @@ public final class DatabaseManager {
 				System.out.println(result.get(i));
 			}
 			break;
-		case 8: //jdb-get-region-info
-			String region = command.substring(customCommandLength + 1, commandLength);
+		case "jdb-get-region-info":
+			if(parsedValues.length!=2){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			String region = parsedValues[1];
 			newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
 					+ "'Contact' from countryregion where countryregion.CountryRegionCode LIKE '?$' union select "
 					+ "countryregion.CountryRegionCode, countryregion.Name, countryregioncurrency.CurrencyCode, 'TaxRate', "
@@ -259,40 +271,38 @@ public final class DatabaseManager {
 				System.out.println(result.get(i));
 			}
 			break;
-		case 9:
+		case "jdb-get-info-by-name":
 			break;
-		case 10:
-			String[] tmp = command.split(" ");
-			if(tmp.length!=2){
+		case "jdb-get-schedule":
+			if(parsedValues.length!=2){
 				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
-			String newcommand = "SELECT purchaseorderheader.OrderDate,"
+			newcommand = "SELECT purchaseorderheader.OrderDate,"
 				+"purchaseorderheader.ShipDate-purchaseorderheader.OrderDate AS OrderToShip,"
 				+"purchaseorderheader.ShipDate,"
 				+"purchaseorderdetail.DueDate-purchaseorderheader.ShipDate AS ShipToFinish,"
 				+"purchaseorderdetail.DueDate "
-				+"WHERE purchaseorderheader.PurchaseOrderID="+tmp[1]
-				+"AND purchaseorderdetail.PurchaseOrderID="+tmp[1];
-			ResultSet rs = queryDatabase(newcommand);
-			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				+"WHERE purchaseorderheader.PurchaseOrderID="+parsedValues[1]
+				+"AND purchaseorderdetail.PurchaseOrderID="+parsedValues[1];
+			rs = queryDatabase(newcommand);
+			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
 			}
 			System.out.println(result.get(0)+" ===== "+ result.get(1) + "DAYS ===== "+ result.get(2) + " ===== " 
 					   + result.get(3) + "DAYS ====== "+ result.get(4));
 			break;
-		case 11:
-			String[] tmp = command.split(" ");
-			if(tmp.length!=2){
+		case "jdb-locate-store":
+			if(parsedValues.length!=2){
 				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
-			String newcommand = "SELECT Name FROM store WHERE "
+			newcommand = "SELECT Name FROM store WHERE "
 				+"store.CustomerID=storecontact.CustomerID "
 				+"AND storecontact.ContactID=vendorcontact.ContactID "
 				+"AND vendorcontact.VendorID=productvendor.VendorID"
-				+"AND productvendor.ProductID="+tmp[1];
-			ResultSet rs = queryDatabase(newcommand);
-			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+				+"AND productvendor.ProductID="+parsedValues[1];
+			rs = queryDatabase(newcommand);
+			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
 			}
