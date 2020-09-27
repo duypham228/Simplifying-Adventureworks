@@ -282,6 +282,20 @@ public final class DatabaseManager {
 					   + result.get(3) + "DAYS ====== "+ result.get(4));
 			break;
 		case 11:
+			String[] tmp = command.split(" ");
+			if(tmp.length!=2){
+				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			String newcommand = "SELECT Name FROM store WHERE "
+				+"store.CustomerID=storecontact.CustomerID "
+				+"AND storecontact.ContactID=vendorcontact.ContactID "
+				+"AND vendorcontact.VendorID=productvendor.VendorID"
+				+"AND productvendor.ProductID="+tmp[1];
+			ResultSet rs = queryDatabase(newcommand);
+			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
 			break;
 		}
 		//TODO:FORM SQL COMMAND HERE.
