@@ -107,7 +107,7 @@ public final class DatabaseManager {
 		boolean validCommandPrefix = false;
 		int customCommandLength = 0, commandIndex = 0, commandLength = command.length();
 		out:
-		for(int i=0; i<customCommands.length; i++) {
+		for(int i=0; i<customCommands.length;i++) {
 			customCommandLength = customCommands[i].length();
 			if(commandLength>=customCommandLength) {
 				if(command.substring(0,customCommandLength).equals(customCommands[i])) {
@@ -183,9 +183,8 @@ public final class DatabaseManager {
 			break;
 		case 6:
 			break;
-		case 7:
+		case 7: //jdb-get-addresses
 			String table = command.substring(customCommandLength + 1, commandLength);
-			System.out.println(table);
 			if (table.equals("address")) {
 				String newcommand = "select address.AddressID, address.AddressLine1, address.AddressLine2, "
 						+ "address.City, address.StateProvinceID, address.PostalCode, customeraddress.CustomerID"
@@ -201,12 +200,9 @@ public final class DatabaseManager {
 						+ " = vendoraddress.AddressTypeID join vendor on vendoraddress.VendorID = vendor.VendorID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
 					System.out.println(result.get(i));
-					rowsreturned = i;
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
 			}
 			else if (table.equals("customeraddress")) {
 				String newcommand = "select customeraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -217,12 +213,9 @@ public final class DatabaseManager {
 						+ "addresstype.AddressTypeID = customeraddress.AddressTypeID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
 					System.out.println(result.get(i));
-					rowsreturned = i;
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
 			}
 			else if (table.equals("vendoraddress")) {
 				String newcommand = "select vendoraddress.AddressID, address.AddressLine1, address.AddressLine2, "
@@ -233,12 +226,9 @@ public final class DatabaseManager {
 						+ "addresstype.AddressTypeID = vendoraddress.AddressTypeID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
 					System.out.println(result.get(i));
-					rowsreturned = i;
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
 			}
 			else if (table.equals("employeeaddress")) {
 				String newcommand = "select employeeaddress.EmployeeID, employeeaddress.AddressID, address.AddressLine1,"
@@ -246,15 +236,40 @@ public final class DatabaseManager {
 						+ "employeeaddress join address on address.AddressID = employeeaddress.AddressID";
 				ResultSet rs = queryDatabase(newcommand);
 				ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
-				int rowsreturned = 0;
 				for (int i = 0; i < result.size(); i++) {
 					System.out.println(result.get(i));
-					rowsreturned = i;
 				}
-				return Integer.toString(rowsreturned) + " rows returned";
 			}
 			break;
-		case 8:
+		case 8: //jdb-get-region-info
+			String region = command.substring(customCommandLength + 1, commandLength);
+			String newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
+					+ "'Contact' from countryregion where countryregion.CountryRegionCode LIKE '?$' union select "
+					+ "countryregion.CountryRegionCode, countryregion.Name, countryregioncurrency.CurrencyCode, 'TaxRate', "
+					+ "'Contact' from countryregion join countryregioncurrency on countryregion.CountryRegionCode = "
+					+ "countryregioncurrency.CountryRegionCode where countryregion.CountryRegionCode LIKE '?$' union "
+					+ "select countryregion.CountryRegionCode, countryregion.Name, countryregioncurrency.CurrencyCode, "
+					+ "salestaxrate.TaxRate AS 'TaxRate', salesorderheader.ContactID AS 'Contact' from countryregion join "
+					+ "countryregioncurrency on countryregion.CountryRegionCode = countryregioncurrency.CountryRegionCode "
+					+ "join stateprovince on stateprovince.CountryRegionCode = countryregion.CountryRegionCode join salestaxrate "
+					+ "on salestaxrate.StateProvinceID = stateprovince.StateProvinceID join salesterritory on "
+					+ "salesterritory.CountryRegionCode = countryregion.CountryRegionCode join salesorderheader on "
+					+ "salesorderheader.TerritoryID = salesterritory.TerritoryID where countryregion.CountryRegionCode "
+					+ "LIKE 'AE' union select countryregion.CountryRegionCode, countryregion.Name, "
+					+ "countryregioncurrency.CurrencyCode, salestaxrate.TaxRate AS 'TaxRate', salesorderheader.ContactID "
+					+ "AS 'Contact' from countryregion join countryregioncurrency on countryregion.CountryRegionCode = "
+					+ "countryregioncurrency.CountryRegionCode join stateprovince on stateprovince.CountryRegionCode = "
+					+ "countryregion.CountryRegionCode join salestaxrate on salestaxrate.StateProvinceID = "
+					+ "stateprovince.StateProvinceID join salesterritory on salesterritory.CountryRegionCode = "
+					+ "countryregion.CountryRegionCode join salesorderheader on salesorderheader.TerritoryID = "
+					+ "salesterritory.TerritoryID where countryregion.CountryRegionCode LIKE '?$'";
+			newcommand = newcommand.replace('?', region.charAt(0));
+			newcommand = newcommand.replace('$', region.charAt(1));
+			ResultSet rs = queryDatabase(newcommand);
+			ArrayList<HashMap<String, Object>> result = interpretResultSet(rs);
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
 			break;
 		case 9:
 			break;
@@ -273,6 +288,22 @@ public final class DatabaseManager {
 	
 	
 	public static String handleSQLCommand(String command) {
+		if(command.equals("jdb")) {
+			System.out.println("Command: " + command);
+			ArrayList<HashMap <String, Object>> tables = interpretResultSet(queryDatabase("show tables;"));
+			for(int i=0; i<tables.size(); i++) {
+				System.out.println(tables.get(i));
+				String tableName = tables.get(i).get("TABLE_NAME").toString(); 
+				ArrayList <HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+tableName+";"));
+				for(int j=0; j<attributes.size(); j++) {
+					System.out.println(attributes.get(j));
+				}
+			}
+		}
+		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
+		System.out.println("Command: " + test);
+		//return interpretResultSet(queryDatabase(test));
+		//return "Done.";
 		String output = "";
 		if(command.equals("help")) {
 			output+="Available Commands :: \n";
