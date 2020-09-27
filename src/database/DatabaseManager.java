@@ -305,11 +305,11 @@ public final class DatabaseManager {
 			if(parsedValues.length!=2){
 				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
-			newcommand = "SELECT Name FROM store WHERE "
+			newcommand = "SELECT store.Name FROM store WHERE "
 				+"store.CustomerID=storecontact.CustomerID "
 				+"AND storecontact.ContactID=vendorcontact.ContactID "
-				+"AND vendorcontact.VendorID=productvendor.VendorID"
-				+"AND productvendor.ProductID="+parsedValues[1];
+				+"AND vendorcontact.VendorID=productvendor.VendorID "
+				+"AND productvendor.ProductID="+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
