@@ -297,11 +297,9 @@ public final class DatabaseManager {
 				+" AND purchaseorderdetail.PurchaseOrderID="+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-			}
-			System.out.println(result.get(0)+" ===== "+ result.get(1) + "DAYS ===== "+ result.get(2) + " ===== " 
-					   + result.get(3) + "DAYS ====== "+ result.get(4));
+			System.out.println(result.get(0).get("OrderDate")+" ===== "+ result.get(1).get("OrderToShip") + "DAYS ===== "
+						+result.get(2).get("ShipDate") + " ===== " + result.get(3).get("ShipToFinish") + "DAYS ====== "
+						+ result.get(4).get("DueDate"));
 			break;
 		case "jdb-locate-store":
 			if(parsedValues.length!=2){
