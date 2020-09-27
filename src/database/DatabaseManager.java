@@ -112,7 +112,7 @@ public final class DatabaseManager {
 		boolean validCommandPrefix = false;
 		int customCommandLength = 0, commandIndex = 0, commandLength = command.length();
 		out:
-		for(int i=0; i<customCommands.length;i++) {
+		for(int i=0; i<customCommands.length; i++) {
 			customCommandLength = customCommands[i].length();
 			if(commandLength>=customCommandLength) {
 				if(command.substring(0,customCommandLength).equals(customCommands[i])) {
@@ -128,6 +128,15 @@ public final class DatabaseManager {
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
 		case 0:
+			ArrayList<HashMap <String, Object>> tables = interpretResultSet(queryDatabase("show tables;"));
+			for(int i=0; i<tables.size(); i++) {
+				System.out.println(tables.get(i));
+				String tableName = tables.get(i).get("TABLE_NAME").toString(); 
+				ArrayList <HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+tableName+";"));
+				for(int j=0; j<attributes.size(); j++) {
+					System.out.println(attributes.get(j));
+				}
+			}
 			break;
 		case 1:
 			break;
@@ -163,22 +172,14 @@ public final class DatabaseManager {
 	
 	
 	public static String handleSQLCommand(String command) {
-		if(command.equals("jdb")) {
-			System.out.println("Command: " + command);
-			ArrayList<HashMap <String, Object>> tables = interpretResultSet(queryDatabase("show tables;"));
-			for(int i=0; i<tables.size(); i++) {
-				System.out.println(tables.get(i));
-				String tableName = tables.get(i).get("TABLE_NAME").toString(); 
-				ArrayList <HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+tableName+";"));
-				for(int j=0; j<attributes.size(); j++) {
-					System.out.println(attributes.get(j));
-				}
-			}
-		}
 		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
+		String output = "";
 		System.out.println("Command: " + test);
-		//return interpretResultSet(queryDatabase(test));
-		return "Done.";
+		ArrayList<HashMap <String, Object>> rsList = interpretResultSet(queryDatabase(test));
+		for(int i=0; i<rsList.size(); i++) {
+			output+= rsList + "\n";
+		}
+		return output;
 	}
 	
 	
