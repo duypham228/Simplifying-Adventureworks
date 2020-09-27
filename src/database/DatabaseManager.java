@@ -120,6 +120,11 @@ public final class DatabaseManager {
 		if(!validCommandPrefix) {
 			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 		}
+	
+		ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
+		ArrayList<String> primaryKeys = new ArrayList<String>(5);
+		String output = "";
+		
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(commandIndex) {
 		case 0:		//"jdb-show-related-tables",
@@ -127,15 +132,12 @@ public final class DatabaseManager {
 			System.out.print("Enter the tablename :: ");
 			String input_table_name = input.nextLine();
 			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
-			ArrayList<String> primaryKeys = new ArrayList<String>(5);
 			for(int i=0; i<input_table.size(); i++) {	//gets primary keys
 				if(input_table.get(i).get("COLUMN_KEY").equals("PRI")) {
 					primaryKeys.add(input_table.get(i).get("COLUMN_NAME").toString());
 				}
 			}
-			ArrayList<HashMap <String, Object>> all_tables = interpretResultSet(queryDatabase("show tables;"));
 			ArrayList<String> relatedTables = new ArrayList<String>(10);
-			
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
 				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
@@ -150,13 +152,26 @@ public final class DatabaseManager {
 					}
 				}
 			}
-			String output = "";
 			for(int i=0; i<relatedTables.size(); i++) {
 				output += relatedTables.get(i) + "\n";
 			}
 			System.out.println(output);
 			break;
-		case 1:
+		case 1:	//jdb-show-all-primary-keys
+			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					HashMap<String, Object> curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+			}
+			for(int i=0; i<primaryKeys.size(); i++) {
+				output += primaryKeys.get(i) + "\n";
+			}
+			System.out.println(output);
 			break;
 		case 2:
 			break;
