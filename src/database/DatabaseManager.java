@@ -258,12 +258,19 @@ public final class DatabaseManager {
 	
 	
 	public static String handleSQLCommand(String command) {
-		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
 		String output = "";
-		System.out.println("Command: " + test);
-		ArrayList<HashMap <String, Object>> rsList = interpretResultSet(queryDatabase(test));
-		for(int i=0; i<rsList.size(); i++) {
-			output+= rsList + "\n";
+		if(command.equals("help")) {
+			output+="Available Commands :: \n";
+			for(int i=0; i<customCommands.length; i++) {
+				output+="\t" + customCommands[i]+"\n";
+			}
+			output+= "\tOR you can enter a direct SQL query.";
+		}
+		else {
+			ArrayList<HashMap <String, Object>> rsList = interpretResultSet(queryDatabase(command));
+			for(int i=0; i<rsList.size(); i++) {
+				output+= rsList + "\n";
+			}
 		}
 		return output;
 	}
