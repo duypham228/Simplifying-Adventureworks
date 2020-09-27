@@ -112,7 +112,7 @@ public final class DatabaseManager {
 		boolean validCommandPrefix = false;
 		int customCommandLength = 0, commandIndex = 0, commandLength = command.length();
 		out:
-		for(int i=0;i<customCommands.length;i++) {
+		for(int i=0; i<customCommands.length;i++) {
 			customCommandLength = customCommands[i].length();
 			if(commandLength>=customCommandLength) {
 				if(command.substring(0,customCommandLength).equals(customCommands[i])) {
