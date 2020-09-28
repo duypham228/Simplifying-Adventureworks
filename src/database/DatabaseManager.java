@@ -189,6 +189,7 @@ public final class DatabaseManager {
 		case "jdb-search-and-join":
 			break;
 		case "jdb-get-view":
+			
 			break;
 		case "jdb-stat":
 			break;
@@ -298,10 +299,10 @@ public final class DatabaseManager {
 				}
 			}
 			*/
-			for (int i = 0; i < matches.size(); i++)
-			{
-				System.out.println(matches.get(i));
-			}
+//			for (int i = 0; i < matches.size(); i++)
+//			{
+//				System.out.println(matches.get(i));
+//			}
 			break;
 		case "jdb-get-schedule":
 			if(parsedValues.length!=2){
@@ -374,7 +375,7 @@ public final class DatabaseManager {
 		else {
 			ArrayList<HashMap <String, Object>> rsList = interpretResultSet(queryDatabase(command));
 			for(int i=0; i<rsList.size(); i++) {
-				output+= rsList + "\n";
+				output+= rsList.get(i) + "\n";
 			}
 		}
 		return output;
