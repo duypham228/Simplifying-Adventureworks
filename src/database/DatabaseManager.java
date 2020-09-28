@@ -192,6 +192,32 @@ public final class DatabaseManager {
 			
 			break;
 		case "jdb-stat":
+			double mean = 0, median = 0;
+			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1]));
+			double min = (double) columninfo.get(0).get(parsedValues[2]), max = (double) columninfo.get(0).get(parsedValues[2]);
+			for (int i = 0; i < columninfo.size(); i++) {
+				if (i == columninfo.size()/2)
+				{
+					median = (double) columninfo.get(i).get(parsedValues[2]);
+				}
+				mean += (double) columninfo.get(i).get(parsedValues[2]);
+				if ((double) columninfo.get(i).get(parsedValues[2]) < min)
+				{
+					min = (double) columninfo.get(i).get(parsedValues[2]);
+				}
+				if ((double) columninfo.get(0).get(parsedValues[2]) > max)
+				{
+					max = (double) columninfo.get(0).get(parsedValues[2]);
+				}
+			}
+			mean /= columninfo.size();
+			System.out.println("min: " + min);
+			System.out.println("max: " + max);
+			System.out.println("mean " + mean);
+			System.out.println("median " + median);
+			double range = max - min;
+			double xfreq = range / 5;
+			double count = columninfo.size();
 			break;
 		case "jdb-get-addresses":
 			if(parsedValues.length!=2){
