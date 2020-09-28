@@ -412,7 +412,7 @@ public final class DatabaseManager {
 			ArrayList<String> keypath = new ArrayList<String>();
 			
 			String command2 = "";
-			command2 += "select * from " + path.get(0) + " ";
+			command2 += "select "+path.get(0)+".*,"+path.get(path.size()-1)+".*,"; //SELECT ALL from T1 and T2.
 			firstKey:
 			for (int k = 0; k < primaryKeys.size(); k++) {
 				String[] temp= primaryKeys.get(k).split(", ");
@@ -427,8 +427,6 @@ public final class DatabaseManager {
 				for (int k = 0; k < primaryKeys.size(); k++) {
 					String[] temp= primaryKeys.get(k).split(", ");
 					if(path.get(i).equals(temp[0]) && !keypath.get(keypath.size()-1).equals(temp[1])) {
-						System.out.println("i=" + i);
-						command2 += "inner join " + temp[0] + " on " + path.get(i-1) + "." + keypath.get(keypath.size()-1) + "=" + path.get(i) + "." + keypath.get(keypath.size()-1) + " ";
 						keypath.add(temp[1]);
 						break secondKey;
 					}
@@ -444,13 +442,21 @@ public final class DatabaseManager {
 					}
 				}
 			
-//			for (int i=0; i<keypath.size(); i++) {
-//				System.out.println()
-//			}
+			for(int i=1;i<path.size()-1;i++) {
+				command2+= path.get(i)+"."+keypath.get(i);
+				if(i!=path.size()-2) {command2+=",";}
+			}
+			
+			command2+=" from "+path.get(0);
+			
+			for(int i =0;i<path.size();i++) {
+				command2+=" join "+path.get(i+1)+" on "+path.get(i)+"."+keypath.get(i)+"="+path.get(i+1)+"."+keypath.get(i);
+			}
 			
 			
-			command2 += "inner join " + path.get(path.size()-1) + " on " + path.get(path.size()-2) + "." + keypath.get(keypath.size()-1) + "=" + path.get(path.size()-1) + "." + keypath.get(keypath.size()-1) + " ";
-//			for(int i = 0; i < path.size()-1; i++) {
+			//command2 += "inner join " + path.get(path.size()-1) + " on " + path.get(path.size()-2) + "." + keypath.get(keypath.size()-1) + "=" + path.get(path.size()-1) + "." + keypath.get(keypath.size()-1) + " ";
+			
+			//			for(int i = 0; i < path.size()-1; i++) {
 //				command2 += path.get(i) + "." + keypath.get(i) + "=" + path.get(i+1) + "." + keypath.get(i+1);
 //				if (i != path.size()-2) {
 //					command2 += " and ";
