@@ -186,6 +186,22 @@ public final class DatabaseManager {
 			System.out.println(output);
 			break;
 		case "jdb-find-column":
+			String column = parsedValues[1];
+		    ArrayList<String> table_with_column = new ArrayList<String>(5);
+		    for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
+		        String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+		        ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+		        for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+		            HashMap<String, Object> curr_attr = attributes.get(j);
+		            if(curr_attr.get("COLUMN_NAME").equals(column)) {
+		                table_with_column.add(curr_table_name+" has column: "+curr_attr.get("COLUMN_NAME").toString());
+		            }
+		        }
+		    }
+		    for(int i=0; i<table_with_column.size(); i++) {
+		        output += table_with_column.get(i) + "\n";
+		    }
+		    System.out.println(output);
 			break;
 		case "jdb-search-path":
 			break;
