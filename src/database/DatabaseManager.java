@@ -108,6 +108,24 @@ public final class DatabaseManager {
 		String[] parsedValues = command.split(" ");
 		boolean validCommandPrefix = false;
 		
+		String[] transitionNodes = {
+				"vendoraddress",
+				"customeraddress",
+				"storecontact",
+				"vendorcontact",
+				"contactcreditcard",
+				"countryregioncurrency",
+				"employeedepartmenthistory",
+				"specialofferproduct",
+				"productproductphoto",
+				"productvendor",
+				"productdocument",
+				"productmodelproductdescriptionculture",
+				"productmodelillustration",
+				"salesorderheadersalesreason",
+				"employeeaddress"//Not sure.
+			};
+		
 		if(parsedValues.length ==0) {
 			return ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
 		}
@@ -220,23 +238,7 @@ public final class DatabaseManager {
 					}
 				}
 			}
-			String[] transitionNodes = {
-				"vendoraddress",
-				"customeraddress",
-				"storecontact",
-				"vendorcontact",
-				"contactcreditcard",
-				"countryregioncurrency",
-				"employeedepartmenthistory",
-				"specialofferproduct",
-				"productproductphoto",
-				"productvendor",
-				"productdocument",
-				"productmodelproductdescriptionculture",
-				"productmodelillustration",
-				"salesorderheadersalesreason",
-				"employeeaddress"//Not sure.
-			};
+			
 			
 			HashMap<String, Object> curr_attr;	
 			ArrayList<String>table2keys = new ArrayList<String>();
@@ -267,7 +269,6 @@ public final class DatabaseManager {
 						tempkeys.add(curr_attr.get("COLUMN_NAME").toString());
 					}
 				}
-				for(int b = 0;b<tempkeys.size();b++){ System.out.println("KEY"+tempkeys.get(b)); }
 				for(int k=0;k<tempkeys.size();k++) {
 					for(int l=0;l<table2keys.size();l++) {
 						if(tempkeys.get(k).equals(table2keys.get(l))) {
@@ -320,6 +321,148 @@ public final class DatabaseManager {
 			System.out.println("\b\b\b}");
 			break;
 		case "jdb-search-and-join":
+			if(parsedValues.length!=3) {
+				ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			
+			//GETS ALL PRIMARY KEYS.
+			for(int i=0; i<all_tables.size(); i++) {	
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				 attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					 curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+			}
+			
+			
+			HashMap<String, Object> curr_attr2;	
+			table2keys = new ArrayList<String>();
+			//GETS Primary keys of table 2
+			attributes = interpretResultSet(queryDatabase("show columns from "+parsedValues[2]+";"));
+			for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+				curr_attr2 = attributes.get(j);
+				if(curr_attr2.get("COLUMN_KEY").equals("PRI")) {
+					table2keys.add(curr_attr2.get("COLUMN_NAME").toString());
+				}
+			}
+
+			ILOVEBFS =  new ArrayDeque<ArrayList<String>>();
+
+			path = new ArrayList<String>();
+			path.add(parsedValues[1]);
+			ILOVEBFS.add(path);
+
+			pathcomplete:
+			while(ILOVEBFS.size()!=0) {
+				ArrayList<String> curr_path = ILOVEBFS.pop();
+				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
+				ArrayList<String> tempkeys = new ArrayList<String>();
+				
+				for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
+					curr_attr2 = temp.get(j);
+					if(curr_attr2.get("COLUMN_KEY").equals("PRI")) {
+						tempkeys.add(curr_attr2.get("COLUMN_NAME").toString());
+					}
+				}
+				for(int k=0;k<tempkeys.size();k++) {
+					for(int l=0;l<table2keys.size();l++) {
+						if(tempkeys.get(k).equals(table2keys.get(l))) {
+							path = curr_path;
+							path.add(parsedValues[2]);
+							break pathcomplete;
+						}
+					}
+				}
+
+				for(String s : transitionNodes) {
+
+					//From transition node
+					temp = interpretResultSet(queryDatabase("show columns from "+s+";"));
+					ArrayList<String> tempkeys2 = new ArrayList<String>();
+					for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
+						curr_attr2 = temp.get(j);
+						if(curr_attr2.get("COLUMN_KEY").equals("PRI")) {
+							tempkeys2.add(curr_attr2.get("COLUMN_NAME").toString());
+						}
+					}
+					ArrayList<String> supertemporary = new ArrayList<String>(); 
+					ArrayList<String> added = new ArrayList<String>(); 
+					for(int k=0;k<tempkeys.size();k++) { 
+						for(int l=0;l<tempkeys2.size();l++) { 
+							duplicate: 
+							if(tempkeys.get(k).equals(tempkeys2.get(l))) { 
+								supertemporary = new ArrayList<String>(curr_path); 
+								for(int m =0;m<supertemporary.size();m++) { 
+									if(supertemporary.get(m).equals(s)) { break duplicate; }
+								} 
+								for(int n=0;n<added.size();n++) { 
+									if(added.get(n).equals(s)) { break duplicate; } 
+								} 
+								supertemporary.add(s); 
+								ILOVEBFS.add(supertemporary); 
+								added.add(s); 
+							} 
+						} 
+					}
+				}
+			}
+			ArrayList<String> keypath = new ArrayList<String>();
+			
+			String command2 = "";
+			command2 += "select * from " + path.get(0) + " ";
+			firstKey:
+			for (int k = 0; k < primaryKeys.size(); k++) {
+				String[] temp= primaryKeys.get(k).split(", ");
+				if(path.get(0).equals(temp[0])) {
+					keypath.add(temp[1]);
+					break firstKey;
+				}
+			}
+			
+			for (int i = 1; i < path.size()-1; i++) {
+				secondKey:
+				for (int k = 0; k < primaryKeys.size(); k++) {
+					String[] temp= primaryKeys.get(k).split(", ");
+					if(path.get(i).equals(temp[0]) && !keypath.get(keypath.size()-1).equals(temp[1])) {
+						System.out.println("i=" + i);
+						command2 += "inner join " + temp[0] + " on " + path.get(i-1) + "." + keypath.get(keypath.size()-1) + "=" + path.get(i) + "." + keypath.get(keypath.size()-1) + " ";
+						keypath.add(temp[1]);
+						break secondKey;
+					}
+				}
+			}
+			
+			lastKey:
+				for (int k = 0; k < primaryKeys.size(); k++) {
+					String[] temp= primaryKeys.get(k).split(", ");
+					if(path.get(path.size()-1).equals(temp[0])) {
+						keypath.add(temp[1]);
+						break lastKey;
+					}
+				}
+			
+//			for (int i=0; i<keypath.size(); i++) {
+//				System.out.println()
+//			}
+			
+			
+			command2 += "inner join " + path.get(path.size()-1) + " on " + path.get(path.size()-2) + "." + keypath.get(keypath.size()-1) + "=" + path.get(path.size()-1) + "." + keypath.get(keypath.size()-1) + " ";
+//			for(int i = 0; i < path.size()-1; i++) {
+//				command2 += path.get(i) + "." + keypath.get(i) + "=" + path.get(i+1) + "." + keypath.get(i+1);
+//				if (i != path.size()-2) {
+//					command2 += " and ";
+//				}
+//			}
+			System.out.println(command2);
+			rs = queryDatabase(command2);
+			result = interpretResultSet(rs);
+			for (int i = 0; i < result.size(); i++) {
+				System.out.println(result.get(i));
+			}
+			
 			break;
 		case "jdb-get-view":
 			Statement stmt;
