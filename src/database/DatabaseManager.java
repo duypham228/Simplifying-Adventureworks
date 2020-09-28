@@ -2,6 +2,7 @@ package database;
 
 //Standard Library Imports
 	import java.util.HashMap;
+	import java.util.ArrayDeque;
 	import java.util.ArrayList;
 	import java.math.*;
 	
@@ -220,8 +221,8 @@ public final class DatabaseManager {
 				}
 			}
 			String[] transitionNodes = {
-				"customeraddress",
 				"vendoraddress",
+				"customeraddress",
 				"storecontact",
 				"vendorcontact",
 				"contactcreditcard",
@@ -248,7 +249,7 @@ public final class DatabaseManager {
 				}
 			}
 
-			LinkedList<ArrayList<String>> ILOVEBFS =  new LinkedList<ArrayList<String>>();
+			ArrayDeque<ArrayList<String>> ILOVEBFS =  new ArrayDeque<ArrayList<String>>();
 
 			ArrayList<String> path = new ArrayList<String>();
 			path.add(parsedValues[1]);
@@ -257,15 +258,16 @@ public final class DatabaseManager {
 			pathcomplete:
 			while(ILOVEBFS.size()!=0) {
 				ArrayList<String> curr_path = ILOVEBFS.pop();
-
 				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
 				ArrayList<String> tempkeys = new ArrayList<String>();
-				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
-					curr_attr = attributes.get(j);
+				
+				for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
+					curr_attr = temp.get(j);
 					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
 						tempkeys.add(curr_attr.get("COLUMN_NAME").toString());
 					}
 				}
+				for(int b = 0;b<tempkeys.size();b++){ System.out.println("KEY"+tempkeys.get(b)); }
 				for(int k=0;k<tempkeys.size();k++) {
 					for(int l=0;l<table2keys.size();l++) {
 						if(tempkeys.get(k).equals(table2keys.get(l))) {
@@ -281,21 +283,30 @@ public final class DatabaseManager {
 					//From transition node
 					temp = interpretResultSet(queryDatabase("show columns from "+s+";"));
 					ArrayList<String> tempkeys2 = new ArrayList<String>();
-					for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
-						curr_attr = attributes.get(j);
+					for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
+						curr_attr = temp.get(j);
 						if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
 							tempkeys2.add(curr_attr.get("COLUMN_NAME").toString());
 						}
 					}
-					for(int k=0;k<tempkeys.size();k++) {
-						for(int l=0;l<tempkeys2.size();l++) {
-							if(tempkeys.get(k).equals(tempkeys2.get(l))) {
-								ArrayList<String> supertemporary = curr_path;
-								supertemporary.add(s);
-								ILOVEBFS.add(supertemporary);
-								break pathcomplete;
-							}
-						}
+					ArrayList<String> supertemporary = new ArrayList<String>(); 
+					ArrayList<String> added = new ArrayList<String>(); 
+					for(int k=0;k<tempkeys.size();k++) { 
+						for(int l=0;l<tempkeys2.size();l++) { 
+							duplicate: 
+							if(tempkeys.get(k).equals(tempkeys2.get(l))) { 
+								supertemporary = new ArrayList<String>(curr_path); 
+								for(int m =0;m<supertemporary.size();m++) { 
+									if(supertemporary.get(m).equals(s)) { break duplicate; }
+								} 
+								for(int n=0;n<added.size();n++) { 
+									if(added.get(n).equals(s)) { break duplicate; } 
+								} 
+								supertemporary.add(s); 
+								ILOVEBFS.add(supertemporary); 
+								added.add(s); 
+							} 
+						} 
 					}
 				}
 			}
@@ -306,7 +317,7 @@ public final class DatabaseManager {
 			for(int i=0;i<path.size();i++) {
 				System.out.print(path.get(i)+" => ");
 			}
-			System.out.println("}");
+			System.out.println("\b\b\b}");
 			break;
 		case "jdb-search-and-join":
 			break;
@@ -491,7 +502,7 @@ public final class DatabaseManager {
 					name += parsedValues[i] + " ";
 			}	
 			name = name.substring(0, name.length() - 1);
-			ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("select * from "+parsedValues[1] +";"));
+			attributes = interpretResultSet(queryDatabase("select * from "+parsedValues[1] +";"));
 			ArrayList<HashMap <String, Object>> matches = new ArrayList<HashMap <String, Object>> (100);
 			for (int i = 0; i < attributes.size(); i++) {
 				for (HashMap.Entry<String, Object> rows_key : attributes.get(i).entrySet()) {
