@@ -449,7 +449,7 @@ public final class DatabaseManager {
 			
 			command2+=" from "+path.get(0);
 			
-			for(int i =0;i<path.size();i++) {
+			for(int i =0;i<path.size()-1;i++) {
 				command2+=" join "+path.get(i+1)+" on "+path.get(i)+"."+keypath.get(i)+"="+path.get(i+1)+"."+keypath.get(i);
 			}
 			
@@ -462,7 +462,6 @@ public final class DatabaseManager {
 //					command2 += " and ";
 //				}
 //			}
-			System.out.println(command2);
 			rs = queryDatabase(command2);
 			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
