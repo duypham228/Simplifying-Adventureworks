@@ -204,6 +204,109 @@ public final class DatabaseManager {
 		    System.out.println(output);
 			break;
 		case "jdb-search-path":
+			if(parsedValues.length!=3) {
+				ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
+			}
+			
+			//GETS ALL PRIMARY KEYS.
+			for(int i=0; i<all_tables.size(); i++) {	
+				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
+				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					HashMap<String, Object> curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+			}
+			String[] transitionNodes = {
+				"customeraddress",
+				"vendoraddress",
+				"storecontact",
+				"vendorcontact",
+				"contactcreditcard",
+				"countryregioncurrency",
+				"employeedepartmenthistory",
+				"specialofferproduct",
+				"productproductphoto",
+				"productvendor",
+				"productdocument",
+				"productmodelproductdescriptionculture",
+				"productmodelillustration",
+				"salesorderheadersalesreason",
+				"employeeaddress"//Not sure.
+			};
+			
+			HashMap<String, Object> curr_attr;	
+			ArrayList<String>table2keys = new ArrayList<String>();
+			//GETS Primary keys of table 2
+			ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+parsedValues[2]+";"));
+			for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+				curr_attr = attributes.get(j);
+				if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+					table2keys.add(curr_attr.get("COLUMN_NAME").toString());
+				}
+			}
+
+			LinkedList<ArrayList<String>> ILOVEBFS =  new LinkedList<ArrayList<String>>();
+
+			ArrayList<String> path = new ArrayList<String>();
+			path.add(parsedValues[1]);
+			ILOVEBFS.add(path);
+
+			pathcomplete:
+			while(ILOVEBFS.size()!=0) {
+				ArrayList<String> curr_path = ILOVEBFS.pop();
+
+				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
+				ArrayList<String> tempkeys = new ArrayList<String>();
+				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+					curr_attr = attributes.get(j);
+					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+						tempkeys.add(curr_attr.get("COLUMN_NAME").toString());
+					}
+				}
+				for(int k=0;k<tempkeys.size();k++) {
+					for(int l=0;l<table2keys.size();l++) {
+						if(tempkeys.get(k).equals(table2keys.get(l))) {
+							path = curr_path;
+							path.add(parsedValues[2]);
+							break pathcomplete;
+						}
+					}
+				}
+
+				for(String s : transitionNodes) {
+
+					//From transition node
+					temp = interpretResultSet(queryDatabase("show columns from "+s+";"));
+					ArrayList<String> tempkeys2 = new ArrayList<String>();
+					for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
+						curr_attr = attributes.get(j);
+						if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
+							tempkeys2.add(curr_attr.get("COLUMN_NAME").toString());
+						}
+					}
+					for(int k=0;k<tempkeys.size();k++) {
+						for(int l=0;l<tempkeys2.size();l++) {
+							if(tempkeys.get(k).equals(tempkeys2.get(l))) {
+								ArrayList<String> supertemporary = curr_path;
+								supertemporary.add(s);
+								ILOVEBFS.add(supertemporary);
+								break pathcomplete;
+							}
+						}
+					}
+				}
+			}
+
+
+			//PRINTING
+			System.out.print("{ ");
+			for(int i=0;i<path.size();i++) {
+				System.out.print(path.get(i)+" => ");
+			}
+			System.out.println("}");
 			break;
 		case "jdb-search-and-join":
 			break;
