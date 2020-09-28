@@ -273,36 +273,31 @@ public final class DatabaseManager {
 			}
 			break;
 		case "jdb-get-info-by-name":
-			
-			/*
-			ArrayList<HashMap<String, Object>> matches = new ArrayList<HashMap<String, Object>> (500);
-			String name = parsedValues[1];
-			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
-				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
-				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
-					HashMap<String, Object> curr_attr = attributes.get(j);
-					//System.out.println(curr_attr);
-						ArrayList<HashMap<String, Object>> rows = interpretResultSet(queryDatabase("select * from " + curr_table_name + ";"));
-						for (int k = 0; k < rows.size(); k++) {
-							for (HashMap.Entry<String, Object> rows_key : rows.get(k).entrySet()) {
-								//System.out.println(rows.get(k));
-								if (rows.get(k).get(rows_key.getValue()) != null)
-								{
-									if (rows.get(k).get(rows_key.getValue()).equals(name)) {
-										matches.add(rows.get(k));
-									}
-								}
+			String name = "";
+			if (parsedValues.length < 3) {
+				return "jdb-get-info-by-name needs 2 arguments";
+			}
+			else if (parsedValues.length >= 3) {
+				for (int i = 2; i < parsedValues.length; i++)
+					name += parsedValues[i] + " ";
+			}	
+			name = name.substring(0, name.length() - 1);
+			ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("select * from "+parsedValues[1] +";"));
+			ArrayList<HashMap <String, Object>> matches = new ArrayList<HashMap <String, Object>> (100);
+			for (int i = 0; i < attributes.size(); i++) {
+				for (HashMap.Entry<String, Object> rows_key : attributes.get(i).entrySet()) {
+					if (attributes.get(i).get(rows_key.getKey()) != null)
+					{
+						if (attributes.get(i).get(rows_key.getKey()).toString().equals(name)) {
+							matches.add(attributes.get(i));
 						}
-					    //System.out.println(entry.getKey() + "/" + entry.getValue());
 					}
 				}
 			}
-			*/
-//			for (int i = 0; i < matches.size(); i++)
-//			{
-//				System.out.println(matches.get(i));
-//			}
+			for (int i = 0; i < matches.size(); i++)
+			{
+				System.out.println(matches.get(i));
+			}
 			break;
 		case "jdb-get-schedule":
 			if(parsedValues.length!=2){
