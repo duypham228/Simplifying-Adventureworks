@@ -253,6 +253,10 @@ public final class DatabaseManager {
 						+ " address.AddressLine2, address.City, address.StateProvinceID, address.PostalCode from "
 						+ "employeeaddress join address on address.AddressID = employeeaddress.AddressID";
 			}
+			else 
+			{
+				return "jdb-get-addresses only accepts address, customeraddrsess, vendoraddress, and employeeaddress as arguments";
+			}
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
