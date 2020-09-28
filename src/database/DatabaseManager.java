@@ -313,19 +313,17 @@ public final class DatabaseManager {
 				+" AND purchaseorderdetail.PurchaseOrderID="+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
-			System.out.println(result.get(0).get("OrderDate")+" ===== "+ result.get(1).get("OrderToShip") + "DAYS ===== "
-						+result.get(2).get("ShipDate") + " ===== " + result.get(3).get("ShipToFinish") + "DAYS ====== "
-						+ result.get(4).get("DueDate"));
+			System.out.println(result.get(0).get("OrderDate")+" ===== "+ (long) result.get(0).get("OrderToShip")/1000000.0 + " DAYS ===== "
+						+result.get(0).get("ShipDate") + " ===== " + (long) result.get(0).get("ShipToFinish")/1000000.0 + " DAYS ====== "
+						+ result.get(0).get("DueDate"));
 			break;
 		case "jdb-locate-store":
 			if(parsedValues.length!=2){
 				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
-			newcommand = "SELECT store.Name FROM store WHERE "
-				+"store.CustomerID=storecontact.CustomerID "
-				+"AND storecontact.ContactID=vendorcontact.ContactID "
-				+"AND vendorcontact.VendorID=productvendor.VendorID "
-				+"AND productvendor.ProductID="+parsedValues[1]+";";
+			newcommand = "select store.Name from salesorderdetail join salesorderheader on salesorderdetail.SalesOrderID = "
+					+ "salesorderheader.SalesOrderID join store on store.CustomerID = salesorderheader.CustomerID where "
+					+ "salesorderdetail.ProductID Like "+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
