@@ -3,6 +3,7 @@ package database;
 //Standard Library Imports
 	import java.util.HashMap;
 	import java.util.ArrayList;
+	import java.math.*;
 	
 //Manager Imports
 	import error.ErrorManager;
@@ -213,8 +214,9 @@ public final class DatabaseManager {
 			break;
 		case "jdb-stat":
 			double mean = 0, median = 0;
-			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1]));
-			double min = (double) columninfo.get(0).get(parsedValues[2]), max = (double) columninfo.get(0).get(parsedValues[2]);
+			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1] +" order by "+parsedValues[2]));
+			double min = (double) columninfo.get(0).get(parsedValues[2]);
+			double max = (double) columninfo.get(0).get(parsedValues[2]);
 			for (int i = 0; i < columninfo.size(); i++) {
 				if (i == columninfo.size()/2){
 					median = (double) columninfo.get(i).get(parsedValues[2]);
@@ -223,8 +225,8 @@ public final class DatabaseManager {
 				if ((double) columninfo.get(i).get(parsedValues[2]) < min){
 					min = (double) columninfo.get(i).get(parsedValues[2]);
 				}
-				if ((double) columninfo.get(0).get(parsedValues[2]) > max){
-					max = (double) columninfo.get(0).get(parsedValues[2]);
+				if ((double) columninfo.get(i).get(parsedValues[2]) > max){
+					max = (double) columninfo.get(i).get(parsedValues[2]);
 				}
 			}
 			mean /= columninfo.size();
@@ -232,43 +234,46 @@ public final class DatabaseManager {
 			System.out.println("max: " + max);
 			System.out.println("mean " + mean);
 			System.out.println("median " + median);
-			double range = max - min;
-			double yfreq = range / 5;
+			int yfreq = (int)max / 6;
 			int xfreq = columninfo.size() / 5;
 			int[] bins = new int[6];
 			for(int i = 0; i<6; i++) {
 				bins[i]=0;
 			}
-			int aVal = (int)yfreq/7 + 1;
+			int aVal = (int)yfreq/7;
 			String space = "____";
 			for(int i = 0; i < columninfo.size(); i++) {
-				if((double) columninfo.get(i).get(parsedValues[2])<xfreq) {
+				if((double) columninfo.get(i).get(parsedValues[2])<yfreq) {
 					bins[0]+=1;
 				}
-				else if((double) columninfo.get(i).get(parsedValues[2])<2*xfreq) {
+				else if((double) columninfo.get(i).get(parsedValues[2])<2*yfreq) {
 					bins[1]+=1;
 				}
-				else if((double) columninfo.get(i).get(parsedValues[2])<3*xfreq) {
+				else if((double) columninfo.get(i).get(parsedValues[2])<3*yfreq) {
 					bins[2]+=1;
 				}
-				else if((double) columninfo.get(i).get(parsedValues[2])<4*xfreq) {
+				else if((double) columninfo.get(i).get(parsedValues[2])<4*yfreq) {
 					bins[3]+=1;
 				}
-				else if((double) columninfo.get(i).get(parsedValues[2])<5*xfreq) {
+				else if((double) columninfo.get(i).get(parsedValues[2])<5*yfreq) {
 					bins[4]+=1;
 				}
-				else if((double) columninfo.get(i).get(parsedValues[2])<6*xfreq) {
+				else if((double) columninfo.get(i).get(parsedValues[2])<6*yfreq) {
 					bins[5]+=1;
 				}
 			}
 			String histogram = "";
-			histogram += "    0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n";
-			histogram += "0-"+yfreq+" |"+ "*".repeat(bins[0]/aVal);
-			histogram += (yfreq)+"-"+(2*yfreq)+" |"+"*".repeat(bins[1]/aVal) +"\n";
-			histogram += (2*yfreq)+"-"+(3*yfreq)+" |"+"*".repeat(bins[2]/aVal)+"\n";
-			histogram += (3*yfreq)+"-"+(4*yfreq)+" |"+"*".repeat(bins[3]/aVal)+"\n";
-			histogram += (4*yfreq)+"-"+(5*yfreq)+" |"+"*".repeat(bins[4]/aVal)+"\n";
-			histogram += (5*yfreq)+"-"+(6*yfreq)+" |"+"*".repeat(bins[5]/aVal);
+			
+			histogram += "    \t0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n";
+			for(int i =0;i<6;i++) {
+				histogram += (i*yfreq)+"-"+((i+1)*yfreq)+"\t\t|"+ "*".repeat((int)(((bins[i]+0.01)/(maxbin+0.01))*7))+"\n";
+			} 
+			histogram += "0-"+yfreq+"\t|"+ "*".repeat(bins[0]/aVal)+"\n";
+			histogram += (yfreq)+"-"+(2*yfreq)+"\t|"+"*".repeat((int)Math.ceil((bins[1]+0.0001)/315.0 * 33.0)) +"\n";
+			histogram += (2*yfreq)+"-"+(3*yfreq)+"\t|"+"*".repeat(bins[2]/aVal)+"\n";
+			histogram += (3*yfreq)+"-"+(4*yfreq)+"\t|"+"*".repeat(bins[3]/aVal)+"\n";
+			histogram += (4*yfreq)+"-"+(5*yfreq)+"\t|"+"*".repeat(bins[4]/aVal)+"\n";
+			histogram += (5*yfreq)+"-"+(6*yfreq)+"\t|"+"*".repeat((int)Math.ceil(bins[5]/aVal));
 			
 			System.out.println(histogram);
 			
