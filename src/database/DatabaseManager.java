@@ -240,7 +240,6 @@ public final class DatabaseManager {
 			for(int i = 0; i<6; i++) {
 				bins[i]=0;
 			}
-			int aVal = (int)yfreq/7;
 			String space = "____";
 			for(int i = 0; i < columninfo.size(); i++) {
 				if((double) columninfo.get(i).get(parsedValues[2])<yfreq) {
@@ -262,22 +261,24 @@ public final class DatabaseManager {
 					bins[5]+=1;
 				}
 			}
+			
 			String histogram = "";
-			
-			histogram += "    \t0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n";
-			for(int i =0;i<6;i++) {
-				histogram += (i*yfreq)+"-"+((i+1)*yfreq)+"\t\t|"+ "*".repeat((int)(((bins[i]+0.01)/(maxbin+0.01))*7))+"\n";
-			} 
-			histogram += "0-"+yfreq+"\t|"+ "*".repeat(bins[0]/aVal)+"\n";
-			histogram += (yfreq)+"-"+(2*yfreq)+"\t|"+"*".repeat((int)Math.ceil((bins[1]+0.0001)/315.0 * 33.0)) +"\n";
-			histogram += (2*yfreq)+"-"+(3*yfreq)+"\t|"+"*".repeat(bins[2]/aVal)+"\n";
-			histogram += (3*yfreq)+"-"+(4*yfreq)+"\t|"+"*".repeat(bins[3]/aVal)+"\n";
-			histogram += (4*yfreq)+"-"+(5*yfreq)+"\t|"+"*".repeat(bins[4]/aVal)+"\n";
-			histogram += (5*yfreq)+"-"+(6*yfreq)+"\t|"+"*".repeat((int)Math.ceil(bins[5]/aVal));
-			
+			int spaceLength = 20;
+			histogram += " ".repeat(spaceLength)+"0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n"; 
+			int temp = histogram.length();
+			for(int i =0;i<6;i++) { 
+				if(i==5) {
+					histogram += (i*yfreq)+"-"+(int)max;
+				} 
+				else {
+					histogram += (i*yfreq)+"-"+((i+1)*yfreq);
+				}
+				histogram += " ".repeat(spaceLength-(histogram.length()-temp))+"|"+ "*".repeat((int)Math.ceil((bins[i]+0.0001)/(5.0*xfreq) * 33.0))+"\n"; 
+				temp = histogram.length();
+			}
 			System.out.println(histogram);
+			break; 
 			
-			break;
 		case "jdb-get-addresses":
 			if(parsedValues.length!=2){
 				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
