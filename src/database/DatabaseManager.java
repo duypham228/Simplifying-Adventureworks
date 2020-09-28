@@ -8,11 +8,12 @@ package database;
 	import error.ErrorManager;
 
 //External Library Imports
-	import java.sql.Connection;
-	import java.sql.DriverManager;
-	import java.sql.SQLException;
-	import java.sql.ResultSet;
-	import java.sql.ResultSetMetaData;
+//	import java.sql.Connection;
+//	import java.sql.DriverManager;
+//	import java.sql.SQLException;
+//	import java.sql.ResultSet;
+//	import java.sql.ResultSetMetaData;
+	import java.sql.*;
 
 public final class DatabaseManager {
 	
@@ -128,6 +129,7 @@ public final class DatabaseManager {
 		String output = "";
 		String newcommand = "";
 		ArrayList<HashMap<String, Object>> result;
+		
 		ResultSet rs;
 		output = "\n";
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
@@ -189,7 +191,25 @@ public final class DatabaseManager {
 		case "jdb-search-and-join":
 			break;
 		case "jdb-get-view":
-			
+			Statement stmt;
+			String view = parsedValues[1];
+			String query = "";
+			for(int i=3; i<parsedValues.length-1; i++) {
+				if(i!=parsedValues.length-1) {
+					query+=parsedValues[i]+" ";
+				}
+				else {
+					query+=parsedValues[i];
+				}
+			}
+			System.out.println(query);
+			try {
+				stmt = db.createStatement();
+				stmt.executeUpdate("CREATE VIEW "+view+" AS "+query+";");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			break;
 		case "jdb-stat":
 			double mean = 0, median = 0;
@@ -383,7 +403,7 @@ public final class DatabaseManager {
 				}
 			}
 		}
-		String test = "select AddressID, AddressLine1, City, PostalCode from address where AddressLine1 like '123%';"; //example query to test
+		String test = ""; //example query to test
 		System.out.println("Command: " + test);
 		//return interpretResultSet(queryDatabase(test));
 		//return "Done.";
