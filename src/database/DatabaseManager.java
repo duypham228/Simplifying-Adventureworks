@@ -216,17 +216,14 @@ public final class DatabaseManager {
 			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1]));
 			double min = (double) columninfo.get(0).get(parsedValues[2]), max = (double) columninfo.get(0).get(parsedValues[2]);
 			for (int i = 0; i < columninfo.size(); i++) {
-				if (i == columninfo.size()/2)
-				{
+				if (i == columninfo.size()/2){
 					median = (double) columninfo.get(i).get(parsedValues[2]);
 				}
 				mean += (double) columninfo.get(i).get(parsedValues[2]);
-				if ((double) columninfo.get(i).get(parsedValues[2]) < min)
-				{
+				if ((double) columninfo.get(i).get(parsedValues[2]) < min){
 					min = (double) columninfo.get(i).get(parsedValues[2]);
 				}
-				if ((double) columninfo.get(0).get(parsedValues[2]) > max)
-				{
+				if ((double) columninfo.get(0).get(parsedValues[2]) > max){
 					max = (double) columninfo.get(0).get(parsedValues[2]);
 				}
 			}
@@ -236,8 +233,45 @@ public final class DatabaseManager {
 			System.out.println("mean " + mean);
 			System.out.println("median " + median);
 			double range = max - min;
-			double xfreq = range / 5;
-			double count = columninfo.size();
+			double yfreq = range / 5;
+			int xfreq = columninfo.size() / 5;
+			int[] bins = new int[6];
+			for(int i = 0; i<6; i++) {
+				bins[i]=0;
+			}
+			int aVal = (int)yfreq/7 + 1;
+			String space = "____";
+			for(int i = 0; i < columninfo.size(); i++) {
+				if((double) columninfo.get(i).get(parsedValues[2])<xfreq) {
+					bins[0]+=1;
+				}
+				else if((double) columninfo.get(i).get(parsedValues[2])<2*xfreq) {
+					bins[1]+=1;
+				}
+				else if((double) columninfo.get(i).get(parsedValues[2])<3*xfreq) {
+					bins[2]+=1;
+				}
+				else if((double) columninfo.get(i).get(parsedValues[2])<4*xfreq) {
+					bins[3]+=1;
+				}
+				else if((double) columninfo.get(i).get(parsedValues[2])<5*xfreq) {
+					bins[4]+=1;
+				}
+				else if((double) columninfo.get(i).get(parsedValues[2])<6*xfreq) {
+					bins[5]+=1;
+				}
+			}
+			String histogram = "";
+			histogram += "    0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n";
+			histogram += "0-"+yfreq+" |"+ "*".repeat(bins[0]/aVal);
+			histogram += (yfreq)+"-"+(2*yfreq)+" |"+"*".repeat(bins[1]/aVal) +"\n";
+			histogram += (2*yfreq)+"-"+(3*yfreq)+" |"+"*".repeat(bins[2]/aVal)+"\n";
+			histogram += (3*yfreq)+"-"+(4*yfreq)+" |"+"*".repeat(bins[3]/aVal)+"\n";
+			histogram += (4*yfreq)+"-"+(5*yfreq)+" |"+"*".repeat(bins[4]/aVal)+"\n";
+			histogram += (5*yfreq)+"-"+(6*yfreq)+" |"+"*".repeat(bins[5]/aVal);
+			
+			System.out.println(histogram);
+			
 			break;
 		case "jdb-get-addresses":
 			if(parsedValues.length!=2){
