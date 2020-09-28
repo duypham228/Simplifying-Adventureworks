@@ -272,15 +272,35 @@ public final class DatabaseManager {
 			}
 			break;
 		case "jdb-get-info-by-name":
+			
+			/*
+			ArrayList<HashMap<String, Object>> matches = new ArrayList<HashMap<String, Object>> (500);
+			String name = parsedValues[1];
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
 				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 					HashMap<String, Object> curr_attr = attributes.get(j);
-					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
-						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
+					//System.out.println(curr_attr);
+						ArrayList<HashMap<String, Object>> rows = interpretResultSet(queryDatabase("select * from " + curr_table_name + ";"));
+						for (int k = 0; k < rows.size(); k++) {
+							for (HashMap.Entry<String, Object> rows_key : rows.get(k).entrySet()) {
+								//System.out.println(rows.get(k));
+								if (rows.get(k).get(rows_key.getValue()) != null)
+								{
+									if (rows.get(k).get(rows_key.getValue()).equals(name)) {
+										matches.add(rows.get(k));
+									}
+								}
+						}
+					    //System.out.println(entry.getKey() + "/" + entry.getValue());
 					}
 				}
+			}
+			*/
+			for (int i = 0; i < matches.size(); i++)
+			{
+				System.out.println(matches.get(i));
 			}
 			break;
 		case "jdb-get-schedule":
