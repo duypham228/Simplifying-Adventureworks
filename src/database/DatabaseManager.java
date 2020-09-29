@@ -126,7 +126,7 @@ public final class DatabaseManager {
 				"employeeaddress"//Not sure.
 			};
 		
-		if(parsedValues.length ==0) {
+		if(parsedValues.length == 0) {
 			return ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
 		}
 		
@@ -152,11 +152,16 @@ public final class DatabaseManager {
 		
 		ResultSet rs;
 		output = "\n";
+		
+		
 		//PLACEHOLDER SWITCH TABLE TO CHOOSE COMMAND TO EXECUTE
 		switch(parsedValues[0]) {
+		
+		// -- SHOW-RELATED-TABLES --
 		case "jdb-show-related-tables":
+			
 			if(parsedValues.length!=2){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-show-related-tables requires 1 argument";
 			}
 			String input_table_name = parsedValues[1];
 			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
@@ -185,9 +190,12 @@ public final class DatabaseManager {
 			}
 			System.out.println(output);
 			break;
+		
+		// -- SHOW-ALL-PRIMARY-KEYS --
 		case "jdb-show-all-primary-keys":
+			
 			if(parsedValues.length!=1){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-show-all-primary-keys requires 0 arguments";
 			}
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
@@ -204,7 +212,13 @@ public final class DatabaseManager {
 			}
 			System.out.println(output);
 			break;
+			
+		// -- FIND-COLUMN --
 		case "jdb-find-column":
+			
+			if(parsedValues.length!=2){
+				return "ERROR: jdb-find-column requires 1 argument";
+			}
 			String column = parsedValues[1];
 		    ArrayList<String> table_with_column = new ArrayList<String>(5);
 		    for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
@@ -222,11 +236,13 @@ public final class DatabaseManager {
 		    }
 		    System.out.println(output);
 			break;
+		
+		// -- SEARCH-PATH --
 		case "jdb-search-path":
-			if(parsedValues.length!=3) {
-				ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
-			}
 			
+			if(parsedValues.length!=3){
+				return "ERROR: jdb-search-path requires 2 arguments";
+			}
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
@@ -237,9 +253,7 @@ public final class DatabaseManager {
 						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
 					}
 				}
-			}
-			
-			
+			}	
 			HashMap<String, Object> curr_attr;	
 			ArrayList<String>table2keys = new ArrayList<String>();
 			//GETS Primary keys of table 2
@@ -250,13 +264,10 @@ public final class DatabaseManager {
 					table2keys.add(curr_attr.get("COLUMN_NAME").toString());
 				}
 			}
-
 			ArrayDeque<ArrayList<String>> ILOVEBFS =  new ArrayDeque<ArrayList<String>>();
-
 			ArrayList<String> path = new ArrayList<String>();
 			path.add(parsedValues[1]);
 			ILOVEBFS.add(path);
-
 			pathcomplete:
 			while(ILOVEBFS.size()!=0) {
 				ArrayList<String> curr_path = ILOVEBFS.pop();
@@ -278,9 +289,7 @@ public final class DatabaseManager {
 						}
 					}
 				}
-
 				for(String s : transitionNodes) {
-
 					//From transition node
 					temp = interpretResultSet(queryDatabase("show columns from "+s+";"));
 					ArrayList<String> tempkeys2 = new ArrayList<String>();
@@ -311,20 +320,19 @@ public final class DatabaseManager {
 					}
 				}
 			}
-
-
-			//PRINTING
 			System.out.print("{ ");
 			for(int i=0;i<path.size();i++) {
 				System.out.print(path.get(i)+" => ");
 			}
 			System.out.println("\b\b\b}");
 			break;
+		
+		// -- SEARCH-AND-JOIN --
 		case "jdb-search-and-join":
-			if(parsedValues.length!=3) {
-				ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
-			}
 			
+			if(parsedValues.length!=3) {
+				return "ERROR: jdb-search-and-join requires 2 arguments";
+			}	
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
@@ -335,9 +343,7 @@ public final class DatabaseManager {
 						primaryKeys.add(curr_table_name+", "+curr_attr.get("COLUMN_NAME").toString());
 					}
 				}
-			}
-			
-			
+			}	
 			HashMap<String, Object> curr_attr2;	
 			table2keys = new ArrayList<String>();
 			//GETS Primary keys of table 2
@@ -348,19 +354,15 @@ public final class DatabaseManager {
 					table2keys.add(curr_attr2.get("COLUMN_NAME").toString());
 				}
 			}
-
 			ILOVEBFS =  new ArrayDeque<ArrayList<String>>();
-
 			path = new ArrayList<String>();
 			path.add(parsedValues[1]);
 			ILOVEBFS.add(path);
-
 			pathcomplete:
 			while(ILOVEBFS.size()!=0) {
 				ArrayList<String> curr_path = ILOVEBFS.pop();
 				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
 				ArrayList<String> tempkeys = new ArrayList<String>();
-				
 				for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
 					curr_attr2 = temp.get(j);
 					if(curr_attr2.get("COLUMN_KEY").equals("PRI")) {
@@ -376,9 +378,7 @@ public final class DatabaseManager {
 						}
 					}
 				}
-
 				for(String s : transitionNodes) {
-
 					//From transition node
 					temp = interpretResultSet(queryDatabase("show columns from "+s+";"));
 					ArrayList<String> tempkeys2 = new ArrayList<String>();
@@ -410,7 +410,6 @@ public final class DatabaseManager {
 				}
 			}
 			ArrayList<String> keypath = new ArrayList<String>();
-			
 			String command2 = "";
 			command2 += "select "+path.get(0)+".*,"+path.get(path.size()-1)+".*,"; //SELECT ALL from T1 and T2.
 			firstKey:
@@ -420,8 +419,7 @@ public final class DatabaseManager {
 					keypath.add(temp[1]);
 					break firstKey;
 				}
-			}
-			
+			}	
 			for (int i = 1; i < path.size()-1; i++) {
 				secondKey:
 				for (int k = 0; k < primaryKeys.size(); k++) {
@@ -432,7 +430,6 @@ public final class DatabaseManager {
 					}
 				}
 			}
-			
 			lastKey:
 				for (int k = 0; k < primaryKeys.size(); k++) {
 					String[] temp= primaryKeys.get(k).split(", ");
@@ -441,35 +438,24 @@ public final class DatabaseManager {
 						break lastKey;
 					}
 				}
-			
 			for(int i=1;i<path.size()-1;i++) {
 				command2+= path.get(i)+"."+keypath.get(i);
 				if(i!=path.size()-2) {command2+=",";}
 			}
-			
 			command2+=" from "+path.get(0);
-			
 			for(int i =0;i<path.size()-1;i++) {
 				command2+=" join "+path.get(i+1)+" on "+path.get(i)+"."+keypath.get(i)+"="+path.get(i+1)+"."+keypath.get(i);
 			}
-			
-			
-			//command2 += "inner join " + path.get(path.size()-1) + " on " + path.get(path.size()-2) + "." + keypath.get(keypath.size()-1) + "=" + path.get(path.size()-1) + "." + keypath.get(keypath.size()-1) + " ";
-			
-			//			for(int i = 0; i < path.size()-1; i++) {
-//				command2 += path.get(i) + "." + keypath.get(i) + "=" + path.get(i+1) + "." + keypath.get(i+1);
-//				if (i != path.size()-2) {
-//					command2 += " and ";
-//				}
-//			}
 			rs = queryDatabase(command2);
 			result = interpretResultSet(rs);
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
 			}
-			
 			break;
+			
+		// -- GET-VIEW --
 		case "jdb-get-view":
+			
 			Statement stmt;
 			String view = parsedValues[1];
 			String query = "";
@@ -490,7 +476,10 @@ public final class DatabaseManager {
 				e.printStackTrace();
 			}
 			break;
+			
+		// -- STAT --
 		case "jdb-stat":
+			
 			double mean = 0, median = 0;
 			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1] +" order by "+parsedValues[2]));
 			double min = (double) columninfo.get(0).get(parsedValues[2]);
@@ -539,7 +528,6 @@ public final class DatabaseManager {
 					bins[5]+=1;
 				}
 			}
-			
 			String histogram = "";
 			int spaceLength = 20;
 			histogram += " ".repeat(spaceLength)+"0"+space+(xfreq)+space+(2*xfreq)+space+(3*xfreq)+space+(4*xfreq)+space+(5*xfreq)+"\n"; 
@@ -556,10 +544,12 @@ public final class DatabaseManager {
 			}
 			System.out.println(histogram);
 			break; 
-			
+		
+		// -- GET-ADDRESSES	--
 		case "jdb-get-addresses":
+			
 			if(parsedValues.length!=2){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-get-addresses requires 1 argument";
 			}
 			String table = parsedValues[1];
 			if (table.equals("address")) {
@@ -607,9 +597,12 @@ public final class DatabaseManager {
 				System.out.println(result.get(i));
 			}
 			break;
+			
+		// -- GET-REGION-INFO --
 		case "jdb-get-region-info":
+			
 			if(parsedValues.length!=2){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-get-region-info requires 1 argument";
 			}
 			String region = parsedValues[1];
 			newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
@@ -640,10 +633,13 @@ public final class DatabaseManager {
 				System.out.println(result.get(i));
 			}
 			break;
+			
+		// -- GET-INFO-BY-NAME --
 		case "jdb-get-info-by-name":
+			
 			String name = "";
 			if (parsedValues.length < 3) {
-				return "jdb-get-info-by-name needs 2 arguments";
+				return "ERROR: jdb-get-info-by-name requires 2 arguments";
 			}
 			else if (parsedValues.length >= 3) {
 				for (int i = 2; i < parsedValues.length; i++)
@@ -667,9 +663,12 @@ public final class DatabaseManager {
 				System.out.println(matches.get(i));
 			}
 			break;
+			
+		// -- GET-SCHEDULE --
 		case "jdb-get-schedule":
+			
 			if(parsedValues.length!=2){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-get-schedule requires 1 argument"; //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
 			newcommand = "SELECT DISTINCT purchaseorderheader.OrderDate,"
 				+"purchaseorderheader.ShipDate-purchaseorderheader.OrderDate AS OrderToShip,"
@@ -685,9 +684,12 @@ public final class DatabaseManager {
 						+result.get(0).get("ShipDate") + " ===== " + (long) result.get(0).get("ShipToFinish")/1000000.0 + " DAYS ====== "
 						+ result.get(0).get("DueDate"));
 			break;
+			
+		// -- LOCATE-STORE --
 		case "jdb-locate-store":
+			
 			if(parsedValues.length!=2){
-				return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-locate-store requires 1 argument"; //TODO: Fix Error Codes, or come up with a better way to do this.
 			}
 			newcommand = "select store.Name from salesorderdetail join salesorderheader on salesorderdetail.SalesOrderID = "
 					+ "salesorderheader.SalesOrderID join store on store.CustomerID = salesorderheader.CustomerID where "
@@ -699,6 +701,8 @@ public final class DatabaseManager {
 			}
 			break;
 		}
+		
+		
 		//TODO:FORM SQL COMMAND HERE.
 		newcommand = "select * from address;"; //example query to test
 		rs = queryDatabase(newcommand);
