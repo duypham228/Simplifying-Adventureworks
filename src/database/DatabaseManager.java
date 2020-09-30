@@ -68,9 +68,6 @@ public final class DatabaseManager {
 	@SuppressWarnings("unchecked")
 	private static ArrayList<HashMap<String, Object>> interpretResultSet(ResultSet rs) {
 		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>(100);
-//		if(rs == null) {
-//			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
-//		}
 		try { //TODO:implement function
 			ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
@@ -127,7 +124,7 @@ public final class DatabaseManager {
 			};
 		
 		if(parsedValues.length == 0) {
-			return ErrorManager.getErrorMessage(0);//TODO: Fix Error Codes, or come up with a better way to do this.
+			return "ERROR: Invalid arguments (parsedValues.length = 0)";
 		}
 		
 		out:
@@ -139,7 +136,7 @@ public final class DatabaseManager {
 		}
 		
 		if(!validCommandPrefix) {
-			return ErrorManager.getErrorMessage(0); //TODO: Fix Error Codes, or come up with a better way to do this.
+			return "ERROR: Invalid command \"" + parsedValues[0] + "\"";
 		}
 	
 		
@@ -149,6 +146,8 @@ public final class DatabaseManager {
 		String output = "";
 		String newcommand = "";
 		ArrayList<HashMap<String, Object>> result;
+		ArrayList<String> curr_path;
+		ArrayList<HashMap <String, Object>> attributes;
 		
 		ResultSet rs;
 		output = "\n";
@@ -173,7 +172,7 @@ public final class DatabaseManager {
 			ArrayList<String> relatedTables = new ArrayList<String>(10);
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 					HashMap<String, Object> curr_attr = attributes.get(j);
 					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
@@ -199,7 +198,7 @@ public final class DatabaseManager {
 			}
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 					HashMap<String, Object> curr_attr = attributes.get(j);
 					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
@@ -223,7 +222,7 @@ public final class DatabaseManager {
 		    ArrayList<String> table_with_column = new ArrayList<String>(5);
 		    for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 		        String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-		        ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+		        attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 		        for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 		            HashMap<String, Object> curr_attr = attributes.get(j);
 		            if(curr_attr.get("COLUMN_NAME").equals(column)) {
@@ -246,7 +245,7 @@ public final class DatabaseManager {
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-				ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 					HashMap<String, Object> curr_attr = attributes.get(j);
 					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
@@ -257,7 +256,7 @@ public final class DatabaseManager {
 			HashMap<String, Object> curr_attr;	
 			ArrayList<String>table2keys = new ArrayList<String>();
 			//GETS Primary keys of table 2
-			ArrayList<HashMap <String, Object>> attributes = interpretResultSet(queryDatabase("show columns from "+parsedValues[2]+";"));
+			attributes = interpretResultSet(queryDatabase("show columns from "+parsedValues[2]+";"));
 			for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 				curr_attr = attributes.get(j);
 				if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
@@ -270,7 +269,7 @@ public final class DatabaseManager {
 			ILOVEBFS.add(path);
 			pathcomplete:
 			while(ILOVEBFS.size()!=0) {
-				ArrayList<String> curr_path = ILOVEBFS.pop();
+				curr_path = ILOVEBFS.pop();
 				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
 				ArrayList<String> tempkeys = new ArrayList<String>();
 				
@@ -336,7 +335,7 @@ public final class DatabaseManager {
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
-				 attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
+				attributes = interpretResultSet(queryDatabase("show columns from "+curr_table_name +";"));
 				for(int j=0; j<attributes.size(); j++) {	//loops through all attributes in each table
 					 curr_attr = attributes.get(j);
 					if(curr_attr.get("COLUMN_KEY").equals("PRI")) {
@@ -360,7 +359,7 @@ public final class DatabaseManager {
 			ILOVEBFS.add(path);
 			pathcomplete:
 			while(ILOVEBFS.size()!=0) {
-				ArrayList<String> curr_path = ILOVEBFS.pop();
+				curr_path = ILOVEBFS.pop();
 				ArrayList<HashMap <String, Object>> temp = interpretResultSet(queryDatabase("show columns from "+curr_path.get(curr_path.size()-1)+";"));
 				ArrayList<String> tempkeys = new ArrayList<String>();
 				for(int j=0; j<temp.size(); j++) {	//loops through all attributes in each table
@@ -668,7 +667,7 @@ public final class DatabaseManager {
 		case "jdb-get-schedule":
 			
 			if(parsedValues.length!=2){
-				return "ERROR: jdb-get-schedule requires 1 argument"; //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-get-schedule requires 1 argument";
 			}
 			newcommand = "SELECT DISTINCT purchaseorderheader.OrderDate,"
 				+"purchaseorderheader.ShipDate-purchaseorderheader.OrderDate AS OrderToShip,"
@@ -689,7 +688,7 @@ public final class DatabaseManager {
 		case "jdb-locate-store":
 			
 			if(parsedValues.length!=2){
-				return "ERROR: jdb-locate-store requires 1 argument"; //TODO: Fix Error Codes, or come up with a better way to do this.
+				return "ERROR: jdb-locate-store requires 1 argument";
 			}
 			newcommand = "select store.Name from salesorderdetail join salesorderheader on salesorderdetail.SalesOrderID = "
 					+ "salesorderheader.SalesOrderID join store on store.CustomerID = salesorderheader.CustomerID where "
