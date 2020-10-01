@@ -234,7 +234,8 @@ public final class DatabaseManager {
 		        output += table_with_column.get(i) + "\n";
 		    }
 		    System.out.println(output);
-			break;
+		    return output;
+//			break;
 		
 		// -- SEARCH-PATH --
 		case "jdb-search-path":
