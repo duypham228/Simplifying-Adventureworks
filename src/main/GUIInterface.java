@@ -56,6 +56,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		this.repaint();
 	}
 	public static void main(String[]args) {
+		DatabaseManager.openConnection();
+		DatabaseManager.queryDatabase("use adventureworks;");
 //		new Dashboard();
 		
 		GUIInterface gui = new GUIInterface();
@@ -96,8 +98,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	@Override
 	public void mouseClicked(MouseEvent mouse) {
 		if (mouse.getSource() == button1) { // jdb-find-column
-			DatabaseManager.openConnection();
-			DatabaseManager.queryDatabase("use adventureworks;");
+//			DatabaseManager.openConnection();
+//			DatabaseManager.queryDatabase("use adventureworks;");
 			
 			JFrame frame_find_column = new JFrame();
 			GUIInterface panel_find_column = new GUIInterface();
