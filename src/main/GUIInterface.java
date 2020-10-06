@@ -62,6 +62,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JLabel searchPath_LB;
 	private static JLabel searchPathResult;
 	
+	// jdb-show-related-tables
+	// using table1 text field
+	private static JButton relatedTables;
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -184,6 +188,13 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		searchPathResult.setBounds(110, 360, 500, 25);
 		gui.add(searchPathResult);
 		
+		/////////////////////////////
+		// jdb-show-related-tables //
+		/////////////////////////////
+		relatedTables = new JButton("jdb-show-related-tabels");
+		relatedTables.setBounds(10, 390, 200, 25);
+		relatedTables.addMouseListener(new GUIInterface());
+		gui.add(relatedTables);
 		
 		frame.setVisible(true);
 		
@@ -403,6 +414,39 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			output = output.substring(0, output.length() - 3);
 			searchPathResult.setText(output);
 			
+		}
+		/////////////////////////////
+		// jdb-show-related-tables //
+		/////////////////////////////
+		else if (mouse.getSource() == relatedTables) {
+			JFrame frame = new JFrame();
+			GUIInterface panel = new GUIInterface();
+			frame.setVisible(true);
+			DefaultTableModel model = new DefaultTableModel();
+			
+			
+			JTable table = new JTable(model);
+//			table1.setBounds(5, 5, 100, 300);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(250, 300));
+			model.addColumn("Table Name");
+//			model1.addColumn("Column");
+			
+			frame.add(panel);
+			frame.setSize(300, 300);
+			
+			String tableName = table1_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-show-related-tables " + tableName);
+			String line[] = output.split("\n");
+			for (String token : line) {
+				model.addRow(new Object[] {token});
+				
+			}
+			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+//			System.out.println(output1);
+			panel.add(sp);
 		}
 		
 		DatabaseManager.closeConnection();

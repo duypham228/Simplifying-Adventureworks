@@ -188,7 +188,8 @@ public final class DatabaseManager {
 				output += relatedTables.get(i) + "\n";
 			}
 			System.out.println(output);
-			break;
+			return output;
+//			break;
 		
 		// -- SHOW-ALL-PRIMARY-KEYS --
 		case "jdb-show-all-primary-keys":
