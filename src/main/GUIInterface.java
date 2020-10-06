@@ -1,8 +1,9 @@
 package main;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+	import java.awt.Color;
+	import java.awt.Dimension;
+	import java.awt.Toolkit;
+	
 //Standard Library Imports
 	import java.awt.event.KeyEvent;
 	import java.awt.event.KeyListener; 
@@ -15,18 +16,19 @@ import java.awt.Toolkit;
 	
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
+	
+	import java.util.ArrayList;
+	import java.util.List;
+	import java.util.Scanner;
+	
+	import javax.swing.JButton;
+	import javax.swing.JFrame;
+	import javax.swing.JLabel;
+	import javax.swing.JPanel;
+	import javax.swing.JScrollPane;
+	import javax.swing.JTable;
+	import javax.swing.JTextField;
+	import javax.swing.table.DefaultTableModel;
 
 //Manager Imports
 	import database.DatabaseManager;
@@ -64,11 +66,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JLabel searchPathResult;
 	
 	// jdb-show-related-tables
-	// using table1 text field
 	private static JButton relatedTables;
 	
 	//show-all-primary-keys
 	private static JButton primaryKey;
+	
+	//jdb-get-view
+	private static JButton getView;
+	private static JLabel view_LB;
+	private static JTextField viewName_TF;
+	private static JTextField viewQuery_TF;
+	
 	
 	public GUIInterface() {
 		super();
@@ -93,6 +101,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		int windowWidth = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 2); 
 		frame.getContentPane().setPreferredSize( new Dimension( windowWidth, (int) (windowWidth / (8.0/6.0)) ) ); 
 		GUIInterface gui = new GUIInterface();
+		frame.setTitle("SAW: Simiplifying Adventure Works");
 //		panel = new JPanel();
 		
 		frame.add(gui);
@@ -206,10 +215,35 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		/////////////////////////////
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
-		primaryKey = new JButton("jd-show-all-primary-keys");
+		primaryKey = new JButton("jdb-show-all-primary-keys");
 		primaryKey.setBounds(10, 490, 200, 25);
 		primaryKey.addMouseListener(new GUIInterface());
 		gui.add(primaryKey);
+		
+		
+		////////////////
+		//jdb-get-view//
+		////////////////
+		view_LB = new JLabel("Create a view:");
+		view_LB.setBounds(10, 530, 100, 25);
+		
+		viewName_TF = new JTextField("name");
+		viewName_TF.setBounds(115, 530, 50, 25);
+		
+		viewQuery_TF = new JTextField("query");
+		viewQuery_TF.setBounds(170, 530, 100, 25);
+		
+		getView = new JButton("jdb-get-view");
+		getView.setBounds(10, 560, 200, 25);
+		getView.addMouseListener(new GUIInterface());
+		
+		gui.add(getView);
+		gui.add(view_LB);
+		gui.add(viewName_TF);
+		gui.add(viewQuery_TF);
+		
+		
+		///////////End of Commands/////////////
 		
 		frame.setVisible(true);
 		gui.revalidate();
@@ -484,8 +518,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			model.addColumn("Table Name");
 			model.addColumn("Primary Key");
 			
-			
-			String tableName = table1_TF.getText();
 			String output = DatabaseManager.handleCustomCommand("jdb-show-all-primary-keys");
 			String line[] = output.split("\n");
 			for (String token : line) {
@@ -497,7 +529,53 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			table.getColumnModel().getColumn(1).setPreferredWidth(200);
 			panel.add(sp);
 		}
-		
+		////////////////
+		//jdb-get-view//
+		////////////////
+		else if(mouse.getSource() == getView) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(500, 350);
+			frame.add(panel);
+			frame.setTitle(viewName_TF.getText());
+			
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+//			sp.setPreferredSize(new Dimension(450, 300));
+			
+			String tableName = table1_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-get-view "+viewName_TF.getText()+" ( "+viewQuery_TF.getText() +"; )");
+			String line[] = output.split("\n");
+			String headers[] = line[1].split(",");
+			
+			System.out.println("---------------------");
+			for(int i=0; i<headers.length; i++) {
+				if(headers[i].indexOf("=") != -1) {
+					System.out.println(headers[i].substring(0, headers[i].indexOf("=")));
+					model.addColumn(headers[i].substring(0, headers[i].indexOf("=")));
+				}
+			}
+			sp.setPreferredSize(new Dimension(headers.length * 70, 300));
+			System.out.println("---------------------");
+			for (String token : line) {
+				if(!token.isEmpty()) {
+					token = token.replace("{", "");
+					token = token.replace("}", "");
+					String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+					ArrayList<String> single_row = new ArrayList<String>();
+					for (String rowToken : row) {
+						String elem[] = rowToken.split("=");
+						single_row.add(elem[1]);
+					}
+					model.addRow(single_row.toArray());
+				}
+			}
+			panel.add(sp);
+		}
 //		DatabaseManager.closeConnection();
 	}
 

@@ -458,7 +458,6 @@ public final class DatabaseManager {
 			
 		// -- GET-VIEW --
 		case "jdb-get-view":
-			
 			Statement stmt;
 			String view = parsedValues[1];
 			String query = "";
@@ -478,11 +477,13 @@ public final class DatabaseManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			result = interpretResultSet(queryDatabase(query+";"));
+			for(int i=0; i<result.size(); i++) {
+				output+=result.get(i)+"\n";
+			}
 			break;
-			
 		// -- STAT --
 		case "jdb-stat":
-			
 			double mean = 0, median = 0;
 			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1] +" order by "+parsedValues[2]));
 			double min = (double) columninfo.get(0).get(parsedValues[2]);
@@ -705,11 +706,6 @@ public final class DatabaseManager {
 			break;
 		}
 		
-		
-//		//TODO:FORM SQL COMMAND HERE.
-//		newcommand = "select * from address;"; //example query to test
-//		rs = queryDatabase(newcommand);
-//		//return interpretResultSet(rs);
 		return output;
 	}
 	
