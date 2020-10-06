@@ -53,6 +53,15 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField query_TF;
 	private static JButton query;
 	
+	// jdb-search-path <table1> <table2>
+	private static JLabel table1_LB;
+	private static JLabel table2_LB;
+	private static JTextField table1_TF;
+	private static JTextField table2_TF;
+	private static JButton searchPath;
+	private static JLabel searchPath_LB;
+	private static JLabel searchPathResult;
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -64,7 +73,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 		});
 		frame.add(this);
-		frame.setSize(350, 350);
+		frame.setSize(700, 700);
 		frame.setVisible(true);
 		this.repaint();
 	}
@@ -128,7 +137,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		/////////////////////////////
 		// Process Raw SQL queries //
 		/////////////////////////////
-		query_LB = new JLabel("Table Name:");
+		query_LB = new JLabel("SQL query input:");
 		query_LB.setBounds(10, 210, 150, 25);
 		gui.add(query_LB);
 		
@@ -141,6 +150,39 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		query.setBounds(10, 240, 200, 25);
 		query.addMouseListener(new GUIInterface());
 		gui.add(query);
+		
+		/////////////////////
+		// jdb-search-path //
+		/////////////////////
+		table1_LB = new JLabel("Table 1:");
+		table1_LB.setBounds(10, 270, 150, 25);
+		gui.add(table1_LB);
+		
+		table1_TF = new JTextField(20);
+		table1_TF.setBounds(110, 270, 165, 25);
+		gui.add(table1_TF);
+		
+		table2_LB = new JLabel("Table 2:");
+		table2_LB.setBounds(10, 300, 150, 25);
+		gui.add(table2_LB);
+		
+		table2_TF = new JTextField(20);
+		table2_TF.setBounds(110, 300, 165, 25);
+		gui.add(table2_TF);
+		
+		// Button for show one or more columns from specific table
+		searchPath = new JButton ("Search Path");
+		searchPath.setBounds(10, 330, 200, 25);
+		searchPath.addMouseListener(new GUIInterface());
+		gui.add(searchPath);
+		
+		searchPath_LB = new JLabel("Result:");
+		searchPath_LB.setBounds(10, 360, 150, 25);
+		gui.add(searchPath_LB);
+		
+		searchPathResult = new JLabel("");
+		searchPathResult.setBounds(110, 360, 500, 25);
+		gui.add(searchPathResult);
 		
 		
 		frame.setVisible(true);
@@ -349,12 +391,19 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 //			table.getColumnModel().getColumn(0).setPreferredWidth(200);
 //			System.out.println(output1);
-			panel.add(sp);
-			
-			
+			panel.add(sp);	
+		}
+		/////////////////////
+		// jdb-search-path //
+		/////////////////////
+		else if (mouse.getSource() == searchPath) {
+			String table1 = table1_TF.getText();
+			String table2 = table2_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-search-path " + table1 + " " + table2);
+			output = output.substring(0, output.length() - 3);
+			searchPathResult.setText(output);
 			
 		}
-		
 		
 		DatabaseManager.closeConnection();
 	}
