@@ -57,8 +57,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		this.repaint();
 	}
 	public static void main(String[]args) {
-		DatabaseManager.openConnection();
-		DatabaseManager.queryDatabase("use adventureworks;");
+//		DatabaseManager.openConnection();
+//		DatabaseManager.queryDatabase("use adventureworks;");
 //		new Dashboard();
 		
 		GUIInterface gui = new GUIInterface();
@@ -67,9 +67,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		frame.add(gui);
 		gui.setLayout(null);
 		
-		label1 = new JLabel("Testing");
-		label1.setBounds(10, 20, 80, 25);
-		gui.add(label1);
+//		label1 = new JLabel("Testing");
+//		label1.setBounds(10, 20, 80, 25);
+//		gui.add(label1);
 		
 		textfield1 = new JTextField(20);
 		textfield1.setBounds(10, 50, 150, 25);
@@ -103,9 +103,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 	@Override
 	public void mouseClicked(MouseEvent mouse) {
+		
+		DatabaseManager.openConnection();
+		DatabaseManager.queryDatabase("use adventureworks;");
 		if (mouse.getSource() == findColumn) { // jdb-find-column
-//			DatabaseManager.openConnection();
-//			DatabaseManager.queryDatabase("use adventureworks;");
+//			
 			
 			JFrame frame_find_column = new JFrame();
 			GUIInterface panel_find_column = new GUIInterface();
@@ -137,7 +139,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			System.out.println(output1);
 			panel_find_column.add(sp);
 	
-			DatabaseManager.closeConnection();
+//			DatabaseManager.closeConnection();
 		}
 		else if (mouse.getSource() == listTables)
 		{
@@ -171,8 +173,12 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			System.out.println(output1);
 			panel_list_tables.add(sp);
 	
-			DatabaseManager.closeConnection();
+			
 		}
+		
+		
+		
+		DatabaseManager.closeConnection();
 	}
 
 	@Override
