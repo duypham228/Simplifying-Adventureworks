@@ -323,9 +323,11 @@ public final class DatabaseManager {
 			System.out.print("{ ");
 			for(int i=0;i<path.size();i++) {
 				System.out.print(path.get(i)+" => ");
+				output += path.get(i) + " => ";
 			}
 			System.out.println("\b\b\b}");
-			break;
+			return output;
+//			break;
 		
 		// -- SEARCH-AND-JOIN --
 		case "jdb-search-and-join":
