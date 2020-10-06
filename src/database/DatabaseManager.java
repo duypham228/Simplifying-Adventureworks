@@ -706,11 +706,11 @@ public final class DatabaseManager {
 		}
 		
 		
-		//TODO:FORM SQL COMMAND HERE.
-		newcommand = "select * from address;"; //example query to test
-		rs = queryDatabase(newcommand);
-		//return interpretResultSet(rs);
-		return "Done.";
+//		//TODO:FORM SQL COMMAND HERE.
+//		newcommand = "select * from address;"; //example query to test
+//		rs = queryDatabase(newcommand);
+//		//return interpretResultSet(rs);
+		return output;
 	}
 	
 	

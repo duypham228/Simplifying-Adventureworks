@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 //Standard Library Imports
 	import java.awt.event.KeyEvent;
 	import java.awt.event.KeyListener; 
@@ -66,6 +67,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	// using table1 text field
 	private static JButton relatedTables;
 	
+	//show-all-primary-keys
+	private static JButton primaryKey;
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -86,6 +90,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //		DatabaseManager.queryDatabase("use adventureworks;");
 //		new Dashboard();
 		
+		int windowWidth = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 2); 
+		frame.getContentPane().setPreferredSize( new Dimension( windowWidth, (int) (windowWidth / (8.0/6.0)) ) ); 
 		GUIInterface gui = new GUIInterface();
 //		panel = new JPanel();
 		
@@ -196,7 +202,18 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		relatedTables.addMouseListener(new GUIInterface());
 		gui.add(relatedTables);
 		
+		
+		/////////////////////////////
+		//jdb-show-all-primary-keys//
+		/////////////////////////////
+		primaryKey = new JButton("jd-show-all-primary-keys");
+		primaryKey.setBounds(10, 490, 200, 25);
+		primaryKey.addMouseListener(new GUIInterface());
+		gui.add(primaryKey);
+		
 		frame.setVisible(true);
+		gui.revalidate();
+		gui.repaint();
 		
 	} //This escapes "static-ness" of main
 	
@@ -413,7 +430,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String output = DatabaseManager.handleCustomCommand("jdb-search-path " + table1 + " " + table2);
 			output = output.substring(0, output.length() - 3);
 			searchPathResult.setText(output);
-			
 		}
 		/////////////////////////////
 		// jdb-show-related-tables //
@@ -448,6 +464,40 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			System.out.println(output1);
 			panel.add(sp);
 		}
+		/////////////////////////////
+		//jdb-show-all-primary-keys//
+		/////////////////////////////
+		else if(mouse.getSource() == primaryKey) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(500, 350);
+			frame.add(panel);
+			
+			
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(450, 300));
+			model.addColumn("Table Name");
+			model.addColumn("Primary Key");
+			
+			
+			String tableName = table1_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-show-all-primary-keys");
+			String line[] = output.split("\n");
+			for (String token : line) {
+				if(!token.isEmpty()) {
+					model.addRow(token.split(","));
+				}
+			}
+			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+			table.getColumnModel().getColumn(1).setPreferredWidth(200);
+			panel.add(sp);
+		}
+		
 		
 		DatabaseManager.closeConnection();
 	}
