@@ -14,6 +14,8 @@ import java.awt.Dimension;
 	
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.JButton;
@@ -34,10 +36,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	
 	private static JFrame frame = new JFrame();
 //	private static JPanel panel;
-	private static JLabel label1;
+	
 	private static JButton findColumn;
 	private static JButton listTables;
 	private static JTextField textfield1;
+	
+	// show one or more columns of specific table
+	private static JLabel label1;
+	private static JLabel label2;
+	private static JTextField columns_TF;
+	private static JTextField table_TF;
+	private static JButton showColumns;
 	
 	
 	
@@ -67,23 +76,53 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		frame.add(gui);
 		gui.setLayout(null);
 		
-//		label1 = new JLabel("Testing");
-//		label1.setBounds(10, 20, 80, 25);
-//		gui.add(label1);
+//
 		
+		// Text field for input text
 		textfield1 = new JTextField(20);
 		textfield1.setBounds(10, 50, 150, 25);
 		gui.add(textfield1);
 		
+		// Button for jdb-find-column
 		findColumn = new JButton("jdb-find-column");
 		findColumn.setBounds(10, 80, 200, 25);
 		findColumn.addMouseListener(new GUIInterface());
 		gui.add(findColumn);
 		
+		// Button for show list of table
 		listTables = new JButton("Show List of Tables");
 		listTables.setBounds(10, 20, 200, 25);
 		listTables.addMouseListener(new GUIInterface());
 		gui.add(listTables);
+		
+		
+		/////////////////////////////////////////////////
+		// Show one or more columns for specific table //
+		/////////////////////////////////////////////////
+		
+		label1 = new JLabel("Column Name:");
+		label1.setBounds(10, 110, 150, 25);
+		gui.add(label1);
+		
+		columns_TF = new JTextField(20);
+		columns_TF.setBounds(110, 110, 165, 25);
+		gui.add(columns_TF);
+		
+		label2 = new JLabel("Table Name:");
+		label2.setBounds(10, 150, 150, 25);
+		gui.add(label2);
+		
+		table_TF = new JTextField(20);
+		table_TF.setBounds(110, 150, 165, 25);
+		gui.add(table_TF);
+		
+		// Button for show one or more columns from specific table
+		showColumns = new JButton ("Show one or more Columns of Specific Table");
+		showColumns.setBounds(10, 180, 200, 25);
+		showColumns.addMouseListener(new GUIInterface());
+		gui.add(showColumns);
+		
+		
 		
 		frame.setVisible(true);
 		
@@ -106,6 +145,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		
 		DatabaseManager.openConnection();
 		DatabaseManager.queryDatabase("use adventureworks;");
+		
+		/////////////////////////////////
+		// Handler for jdb-find-column //
+		/////////////////////////////////
 		if (mouse.getSource() == findColumn) { // jdb-find-column
 //			
 			
@@ -141,6 +184,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	
 //			DatabaseManager.closeConnection();
 		}
+		
+		/////////////////////////////////////
+		// Handler for Show list of tables //
+		/////////////////////////////////////
 		else if (mouse.getSource() == listTables)
 		{
 			JFrame frame_list_tables = new JFrame();
@@ -159,7 +206,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			model1.addColumn("Column");
 			
 			frame_list_tables.add(panel_list_tables);
-			panel_list_tables.setSize(300, 300);
+			frame_list_tables.setSize(300, 300);
 			
 			String output2 = DatabaseManager.handleSQLCommand("show tables;");
 			String line[] = output2.split("\n");
@@ -173,6 +220,56 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			System.out.println(output1);
 			panel_list_tables.add(sp);
 	
+			
+		}
+		////////////////////////////////////////////////////////////
+		// Handler for show one or more columns of specific table //
+		////////////////////////////////////////////////////////////
+		else if (mouse.getSource() == showColumns) {
+			JFrame frame_columns_table = new JFrame();
+			GUIInterface panel_show_column = new GUIInterface();
+			frame_columns_table.setVisible(true);
+			DefaultTableModel model = new DefaultTableModel();
+			
+			
+			JTable table = new JTable(model);
+//			table.setBounds(5, 5, 100, 300);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(250, 300));
+			
+//			model1.addColumn("Column");
+			
+			frame_columns_table.add(panel_show_column);
+			frame_columns_table.setSize(300, 300);
+			
+			String columnName = columns_TF.getText();
+			String tableName = table_TF.getText();
+			
+			String columnList[] = columnName.split(",");
+			for (String token : columnList) {
+				model.addColumn(token.trim());
+			}
+			
+			
+			String output = DatabaseManager.handleSQLCommand("select " + columnName + " from " + tableName + ";");
+			String line[] = output.split("\n");
+			for (String token : line) {
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+				String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+				List<String> single_row = new ArrayList<String>();
+				for (String rowToken : row) {
+					String elem[] = rowToken.split("=");
+					single_row.add(elem[1]);
+				}
+				model.addRow(single_row.toArray());
+				
+			}
+			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+//			System.out.println(output1);
+			panel_show_column.add(sp);
 			
 		}
 		
