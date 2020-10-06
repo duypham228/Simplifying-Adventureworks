@@ -78,6 +78,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				frame.dispose();
+				DatabaseManager.closeConnection();
 			}
 		});
 		frame.add(this);
@@ -86,9 +87,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		this.repaint();
 	}
 	public static void main(String[]args) {
-//		DatabaseManager.openConnection();
-//		DatabaseManager.queryDatabase("use adventureworks;");
-//		new Dashboard();
+		DatabaseManager.openConnection();
+		DatabaseManager.queryDatabase("use adventureworks;");
 		
 		int windowWidth = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 2); 
 		frame.getContentPane().setPreferredSize( new Dimension( windowWidth, (int) (windowWidth / (8.0/6.0)) ) ); 
@@ -232,8 +232,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	@Override
 	public void mouseClicked(MouseEvent mouse) {
 		
-		DatabaseManager.openConnection();
-		DatabaseManager.queryDatabase("use adventureworks;");
+//		DatabaseManager.openConnection();
+//		DatabaseManager.queryDatabase("use adventureworks;");
 		
 		/////////////////////////////////
 		// Handler for jdb-find-column //
@@ -498,8 +498,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			panel.add(sp);
 		}
 		
-		
-		DatabaseManager.closeConnection();
+//		DatabaseManager.closeConnection();
 	}
 
 	@Override
