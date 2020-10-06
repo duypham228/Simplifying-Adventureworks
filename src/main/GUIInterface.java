@@ -42,13 +42,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField textfield1;
 	
 	// show one or more columns of specific table
-	private static JLabel label1;
-	private static JLabel label2;
+	private static JLabel columns_LB;
+	private static JLabel table_LB;
 	private static JTextField columns_TF;
 	private static JTextField table_TF;
 	private static JButton showColumns;
 	
-	
+	// process raw sql queries
+	private static JLabel query_LB;
+	private static JTextField query_TF;
+	private static JButton query;
 	
 	public GUIInterface() {
 		super();
@@ -100,17 +103,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		// Show one or more columns for specific table //
 		/////////////////////////////////////////////////
 		
-		label1 = new JLabel("Column Name:");
-		label1.setBounds(10, 110, 150, 25);
-		gui.add(label1);
+		columns_LB = new JLabel("Column Name:");
+		columns_LB.setBounds(10, 110, 150, 25);
+		gui.add(columns_LB);
 		
 		columns_TF = new JTextField(20);
 		columns_TF.setBounds(110, 110, 165, 25);
 		gui.add(columns_TF);
 		
-		label2 = new JLabel("Table Name:");
-		label2.setBounds(10, 150, 150, 25);
-		gui.add(label2);
+		table_LB = new JLabel("Table Name:");
+		table_LB.setBounds(10, 150, 150, 25);
+		gui.add(table_LB);
 		
 		table_TF = new JTextField(20);
 		table_TF.setBounds(110, 150, 165, 25);
@@ -122,6 +125,22 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		showColumns.addMouseListener(new GUIInterface());
 		gui.add(showColumns);
 		
+		/////////////////////////////
+		// Process Raw SQL queries //
+		/////////////////////////////
+		query_LB = new JLabel("Table Name:");
+		query_LB.setBounds(10, 210, 150, 25);
+		gui.add(query_LB);
+		
+		query_TF = new JTextField(20);
+		query_TF.setBounds(110, 210, 165, 25);
+		gui.add(query_TF);
+		
+		// Button for show one or more columns from specific table
+		query = new JButton ("Raw SQL Query");
+		query.setBounds(10, 240, 200, 25);
+		query.addMouseListener(new GUIInterface());
+		gui.add(query);
 		
 		
 		frame.setVisible(true);
@@ -267,12 +286,74 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				model.addRow(single_row.toArray());
 				
 			}
-			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+//			table.getColumnModel().getColumn(0).setPreferredWidth(200);
 //			System.out.println(output1);
 			panel_show_column.add(sp);
 			
 		}
-		
+		/////////////////////////////
+		// Process Raw SQL queries //
+		/////////////////////////////
+		else if (mouse.getSource() == query) {
+			JFrame frame = new JFrame();
+			GUIInterface panel = new GUIInterface();
+			frame.setVisible(true);
+			DefaultTableModel model = new DefaultTableModel();
+			
+			
+			JTable table = new JTable(model);
+//			table.setBounds(5, 5, 100, 300);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(250, 300));
+			
+//			model1.addColumn("Column");
+			
+			frame.add(panel);
+			frame.setSize(300, 300);
+			
+			String sqlQuery = query_TF.getText();
+			
+//			String columnList[] = columnName.split(",");
+//			for (String token : columnList) {
+//				model.addColumn(token.trim());
+//			}
+			
+			
+			String output = DatabaseManager.handleSQLCommand(sqlQuery);
+			String line[] = output.split("\n");
+			
+			// add column names
+			String firstLine = line[0];
+			firstLine = firstLine.replace("{", "");
+			firstLine = firstLine.replace("}", "");
+			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+			for (String token : firstRow) {
+				String elem[] = token.split("=");
+				model.addColumn(elem[0]);
+			}
+			
+			// add rows data
+			for (String token : line) {
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+				String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+				List<String> single_row = new ArrayList<String>();
+				for (String rowToken : row) {
+					String elem[] = rowToken.split("=");
+					single_row.add(elem[1]);
+				}
+				model.addRow(single_row.toArray());
+				
+			}
+//			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+//			System.out.println(output1);
+			panel.add(sp);
+			
+			
+			
+		}
 		
 		
 		DatabaseManager.closeConnection();
