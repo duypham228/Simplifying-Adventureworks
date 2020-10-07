@@ -29,6 +29,18 @@ package main;
 	import javax.swing.JTable;
 	import javax.swing.JTextField;
 	import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 //Manager Imports
 	import database.DatabaseManager;
@@ -98,6 +110,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	// jdb-show-all-primary-keys
 	private static JButton primaryKeys;
 
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -329,6 +342,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.revalidate();
 		gui.repaint();
 		///////////End of Commands/////////////
+		frame.setVisible(true);
+		
 	} //This escapes "static-ness" of main
 
 	//Could make listeners frame-synchronized or based on press & release combo
@@ -832,6 +847,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		}
 
 		//DatabaseManager.closeConnection();
+		
+		DatabaseManager.closeConnection();
 	}
 
 	@Override
