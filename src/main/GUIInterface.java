@@ -112,6 +112,13 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField getInfo_attributeTF;
 	private static JButton getInfo;
 
+	//join up to 4 tables
+	private static JLabel joinTables_LB;
+	private static JTextField joinTables_t1k1TF;
+	private static JTextField joinTables_t2k2TF;
+	private static JTextField joinTables_t3k3TF;
+	private static JTextField joinTables_t4TF;
+	private static JButton joinTables;
 
 
 	public GUIInterface() {
@@ -126,7 +133,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 		});
 		frame.add(this);
-		frame.setSize(700, 800);
+		frame.setSize(700, 850);
 		frame.setVisible(true);
 		this.repaint();
 	}
@@ -389,6 +396,35 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		getInfo.setBounds(10, 690, 200, 25);
 		getInfo.addMouseListener(new GUIInterface());
 		gui.add(getInfo);
+		
+		////////////////////////////
+		//  Join up to 4 tables   //
+		////////////////////////////	
+		joinTables_LB = new JLabel("Table names and keys:");
+		joinTables_LB.setBounds(10, 720, 100, 25);
+		gui.add(joinTables_LB);
+		
+		joinTables_t1k1TF = new JTextField("product ProductID");
+		joinTables_t1k1TF.setBounds(110, 720, 135, 25);
+		gui.add(joinTables_t1k1TF);
+
+		joinTables_t2k2TF = new JTextField("productvendor VendorID");
+		joinTables_t2k2TF.setBounds(245, 720, 135, 25);
+		gui.add(joinTables_t2k2TF);
+		
+		joinTables_t3k3TF = new JTextField("vendor VendorID");
+		joinTables_t3k3TF.setBounds(380, 720, 135, 25);
+		gui.add(joinTables_t3k3TF);
+
+		joinTables_t4TF = new JTextField("vendorcontact");
+		joinTables_t4TF.setBounds(515, 720, 100, 25);
+		gui.add(joinTables_t4TF);
+		
+		joinTables = new JButton("Show results of joining up to 4 tables");
+		joinTables.setBounds(10, 750, 200, 25);
+		joinTables.addMouseListener(new GUIInterface());
+		gui.add(joinTables);
+		
 
 		//JTable table = new JTable();
 		frame.setVisible(true);
@@ -942,6 +978,91 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String tableName = getInfo_tableTF.getText();
 			String attributeName = getInfo_attributeTF.getText();
 			String output = DatabaseManager.handleCustomCommand("jdb-get-info-by-name " +  tableName + " " + attributeName);
+			String line[] = output.split("\n");
+			//System.out.println(line.length);
+
+			// add column names
+			String firstLine = line[1];
+			//System.out.println(firstLine);
+			firstLine = firstLine.replace("{", "");
+			firstLine = firstLine.replace("}", "");
+			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+			for (String token : firstRow) {
+					String elem[] = token.split("=");
+					System.out.println("ColumnName: " + elem[0]);
+					if (elem.length > 1)
+						model.addColumn(elem[0]);
+				}
+
+			// add rows data
+			//String
+			for (String token : line) {
+				if (token.length() > 0) {
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+
+				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
+				List<String> single_row = new ArrayList<String>();
+				for (String rowToken : row) {
+					System.out.println(rowToken);
+					String elem[] = rowToken.split("=");
+					if (elem.length > 1)
+						single_row.add(elem[1]);
+					else
+						single_row.add(elem[0]);
+				}
+				model.addRow(single_row.toArray());
+				}
+			}
+			panel.add(sp);
+		}
+		//Joining up to 4 tables
+		else if (mouse.getSource() == joinTables) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(500, 350);
+			frame.add(panel);
+
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			sp.setPreferredSize(new Dimension(500, 300));
+			String t1k1 = joinTables_t1k1TF.getText();
+			String [] splitfieldt1k1 = t1k1.split(" ");
+			String t1 = splitfieldt1k1[0];
+			String k1 = "";
+			if (splitfieldt1k1.length > 1)
+				k1 = splitfieldt1k1[1];
+			String t2k2 = joinTables_t2k2TF.getText();
+			String [] splitfieldt2k2 = t2k2.split(" ");
+			String t2 = splitfieldt2k2[0];
+			String k2 = "";
+			if (splitfieldt2k2.length > 1)
+				k2 = splitfieldt2k2[1];
+			String t3k3 = joinTables_t3k3TF.getText();
+			String [] splitfieldt3k3 = t3k3.split(" ");
+			String t3 = splitfieldt3k3[0];
+			String k3 = "";
+			if (splitfieldt3k3.length > 1)
+				k3 = splitfieldt3k3[1];
+			String t4 = joinTables_t4TF.getText();
+			String query = "";
+			if (splitfieldt1k1.length > 1 && splitfieldt2k2.length > 1 && splitfieldt3k3.length > 1 && t4.length() > 0) {
+				query = "select * from " + t1 + " join " + t2 + " on " + t1 + "." + k1 + " = " + t2 + "." + k1 + " join "
+						+ t3 + " on " + t3 + "." + k2 + " = " + t2 + "." + k2 + " join " + t4 + " on " + t4 + "." + k3 + " = " + t3 + "." + k3;
+			}
+			else if (splitfieldt1k1.length > 1 && splitfieldt2k2.length > 1 && splitfieldt3k3.length > 0) {
+				query = "select * from " + t1 + " join " + t2 + " on " + t1 + "." + k1 + " = " + t2 + "." + k1 + " join "
+						+ t3 + " on " + t3 + "." + k2 + " = " + t2 + "." + k2;
+			}
+			else if (splitfieldt1k1.length > 1 && splitfieldt2k2.length > 0) {
+				query = "select * from " + t1 + " join " + t2 + " on " + t1 + "." + k1 + " = " + t2 + "." + k1;
+			}
+ 			String output = DatabaseManager.handleSQLCommand(query);
 			String line[] = output.split("\n");
 			//System.out.println(line.length);
 
