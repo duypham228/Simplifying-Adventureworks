@@ -77,6 +77,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField viewName_TF;
 	private static JTextField viewQuery_TF;
 	
+	//jdb-get-addresses
+	private static JLabel getAddresses_LB;
+	private static JTextField getAddresses_TF;
+	private static JButton getAddresses;
 	
 	public GUIInterface() {
 		super();
@@ -220,7 +224,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		primaryKey.addMouseListener(new GUIInterface());
 		gui.add(primaryKey);
 		
-		
 		////////////////
 		//jdb-get-view//
 		////////////////
@@ -243,12 +246,28 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.add(viewQuery_TF);
 		
 		
-		///////////End of Commands/////////////
+
+		////////////////////////////
+		//    jdb-get-addresses   //
+		////////////////////////////
+		getAddresses_LB = new JLabel("Name of table:");
+		getAddresses_LB.setBounds(10, 590, 200, 25);
+		gui.add(getAddresses_LB);
+		
+		getAddresses_TF = new JTextField(20);
+		getAddresses_TF.setBounds(110, 590, 200, 25);
+		gui.add(getAddresses_TF);
+		
+		getAddresses = new JButton("jdb-get-addresses");
+		getAddresses.setBounds(10, 620, 200, 25);
+		getAddresses.addMouseListener(new GUIInterface());
+		gui.add(getAddresses);
+
 		
 		frame.setVisible(true);
 		gui.revalidate();
 		gui.repaint();
-		
+		///////////End of Commands/////////////
 	} //This escapes "static-ness" of main
 	
 	//Could make listeners frame-synchronized or based on press & release combo
@@ -316,16 +335,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			JFrame frame_list_tables = new JFrame();
 			GUIInterface panel_list_tables = new GUIInterface();
 			frame_list_tables.setVisible(true);
-			DefaultTableModel model2 = new DefaultTableModel();
+			DefaultTableModel model = new DefaultTableModel();
 			
 			
-			JTable table2 = new JTable(model2);
+			JTable table = new JTable(model);
 //			table1.setBounds(5, 5, 100, 300);
-			table2.setShowGrid(true);
-			table2.setGridColor(Color.black);
-			JScrollPane sp = new JScrollPane(table2);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
 			sp.setPreferredSize(new Dimension(250, 300));
-			model2.addColumn("Table Name");
+			model.addColumn("Table Name");
 //			model1.addColumn("Column");
 			
 			frame_list_tables.add(panel_list_tables);
@@ -336,10 +355,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			for (String token : line) {
 				token = token.substring(12, token.length() - 1);
 				String row[] = token.split(" ");
-				model2.addRow(new Object[] {row[0]});
+				model.addRow(new Object[] {row[0]});
 				
 			}
-			table2.getColumnModel().getColumn(0).setPreferredWidth(200);
+			table.getColumnModel().getColumn(0).setPreferredWidth(200);
 //			System.out.println(output1);
 			panel_list_tables.add(sp);
 	
@@ -442,14 +461,19 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			for (String token : line) {
 				token = token.replace("{", "");
 				token = token.replace("}", "");
-				String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+				
+				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
+					System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
-					single_row.add(elem[1]);
+					if (elem.length > 1)
+						single_row.add(elem[1]);
+					else
+						single_row.add(elem[0]);
 				}
 				model.addRow(single_row.toArray());
-				
+							
 			}
 //			table.getColumnModel().getColumn(0).setPreferredWidth(200);
 //			System.out.println(output1);
@@ -568,7 +592,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 					String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 					ArrayList<String> single_row = new ArrayList<String>();
 					for (String rowToken : row) {
-						String elem[] = rowToken.split("=");
+						String elem[] = rowToken.split(",[a-zA-Z0-9 ]*[^,]*=");
 						single_row.add(elem[1]);
 					}
 					model.addRow(single_row.toArray());
@@ -577,6 +601,61 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			panel.add(sp);
 		}
 //		DatabaseManager.closeConnection();
+		////////////////////////////
+		//    jdb-get-addresses   //
+		////////////////////////////
+		else if (mouse.getSource() == getAddresses) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(1200, 350);
+			frame.add(panel);
+
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(1100, 300));
+			
+			String tableName = getAddresses_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-get-addresses " + tableName);
+			String line[] = output.split("\n");
+			
+			// add column names
+			String firstLine = line[0];
+			firstLine = firstLine.replace("{", "");
+			firstLine = firstLine.replace("}", "");
+			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+			for (String token : firstRow) {
+					String elem[] = token.split("=");
+					model.addColumn(elem[0]);
+				}
+						
+			// add rows data
+			//String 
+			for (String token : line) {
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+				
+				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
+				List<String> single_row = new ArrayList<String>();
+				for (String rowToken : row) {
+					System.out.println(rowToken);
+					String elem[] = rowToken.split("=");
+					if (elem.length > 1)
+						single_row.add(elem[1]);
+					else
+						single_row.add(elem[0]);
+				}
+				model.addRow(single_row.toArray());
+							
+			}
+			panel.add(sp);
+			
+		}
+		
+		DatabaseManager.closeConnection();
 	}
 
 	@Override
