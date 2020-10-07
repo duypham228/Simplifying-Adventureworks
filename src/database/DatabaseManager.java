@@ -608,7 +608,7 @@ public final class DatabaseManager {
 			int range = 0;
 			if (rangeProvided)
 				range = Integer.parseInt(parsedValues[2]) * 5000;
-			if (range - 1000 > result.size())
+			if (range - 1000 > result.size() || range <= 0)
 				rangeProvided = false;
 			output = "";
 			for (int i = 0; i < result.size(); i++) {
@@ -663,7 +663,7 @@ public final class DatabaseManager {
 			int range2 = 0;
 			if (rangeProvided2)
 				range2 = Integer.parseInt(parsedValues[2]) * 5000;
-			if (range2 - 1000 > result.size())
+			if (range2 - 1000 > result.size() || range2 <= 0)
 				rangeProvided2 = false;
 			output = "";
 			for (int i = 0; i < result.size(); i++) {
