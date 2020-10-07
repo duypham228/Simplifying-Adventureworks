@@ -636,10 +636,12 @@ public final class DatabaseManager {
 			newcommand = newcommand.replace('$', region.charAt(1));
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
-			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
+			output = "";
+			for (int i = 0; i < 1000; i++) {
+				//System.out.println(result.get(i));
+				output += result.get(i) + "\n";
 			}
-			break;
+			return output;
 			
 		// -- GET-INFO-BY-NAME --
 		case "jdb-get-info-by-name":

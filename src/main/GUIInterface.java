@@ -82,6 +82,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField getAddresses_TF;
 	private static JButton getAddresses;
 	
+	//jdb-get-region-info
+	private static JLabel getRegion_LB;
+	private static JTextField getRegion_TF;
+	private static JButton getRegion;
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -110,6 +115,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		
 		frame.add(gui);
 		gui.setLayout(null);
+		
 		
 //
 		
@@ -220,7 +226,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
 		primaryKey = new JButton("jdb-show-all-primary-keys");
-		primaryKey.setBounds(10, 490, 200, 25);
+		primaryKey.setBounds(10, 420, 200, 25);
 		primaryKey.addMouseListener(new GUIInterface());
 		gui.add(primaryKey);
 		
@@ -228,16 +234,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		//jdb-get-view//
 		////////////////
 		view_LB = new JLabel("Create a view:");
-		view_LB.setBounds(10, 530, 100, 25);
+		view_LB.setBounds(10, 450, 100, 25);
 		
 		viewName_TF = new JTextField("name");
-		viewName_TF.setBounds(115, 530, 50, 25);
+		viewName_TF.setBounds(115, 470, 50, 25);
 		
 		viewQuery_TF = new JTextField("query");
-		viewQuery_TF.setBounds(170, 530, 100, 25);
+		viewQuery_TF.setBounds(170, 470, 100, 25);
 		
 		getView = new JButton("jdb-get-view");
-		getView.setBounds(10, 560, 200, 25);
+		getView.setBounds(10, 500, 200, 25);
 		getView.addMouseListener(new GUIInterface());
 		
 		gui.add(getView);
@@ -251,19 +257,35 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		//    jdb-get-addresses   //
 		////////////////////////////
 		getAddresses_LB = new JLabel("Name of table:");
-		getAddresses_LB.setBounds(10, 590, 200, 25);
+		getAddresses_LB.setBounds(10, 530, 200, 25);
 		gui.add(getAddresses_LB);
 		
 		getAddresses_TF = new JTextField(20);
-		getAddresses_TF.setBounds(110, 590, 200, 25);
+		getAddresses_TF.setBounds(110, 530, 200, 25);
 		gui.add(getAddresses_TF);
 		
 		getAddresses = new JButton("jdb-get-addresses");
-		getAddresses.setBounds(10, 620, 200, 25);
+		getAddresses.setBounds(10, 560, 200, 25);
 		getAddresses.addMouseListener(new GUIInterface());
 		gui.add(getAddresses);
-
 		
+		////////////////////////////
+		//  jdb-get-region-info   //
+		////////////////////////////
+		getRegion_LB = new JLabel("Enter Region:");
+		getRegion_LB.setBounds(10, 590, 200, 25);
+		gui.add(getRegion_LB);
+		
+		getRegion_TF = new JTextField(20);
+		getRegion_TF.setBounds(110, 590, 200, 25);
+		gui.add(getRegion_TF);
+		
+		getRegion = new JButton("jdb-get-region-info");
+		getRegion.setBounds(10, 620, 200, 25);
+		getRegion.addMouseListener(new GUIInterface());
+		gui.add(getRegion);
+
+		//JTable table = new JTable();
 		frame.setVisible(true);
 		gui.revalidate();
 		gui.repaint();
@@ -652,7 +674,58 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 							
 			}
 			panel.add(sp);
+		}
+		////////////////////////////
+		//  jdb-get-region-info   //
+		////////////////////////////
+		else if (mouse.getSource() == getRegion) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(500, 350);
+			frame.add(panel);
+
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(450, 300));
 			
+			String regionName = getRegion_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-get-region-info " + regionName);
+			String line[] = output.split("\n");
+			
+			// add column names
+			String firstLine = line[0];
+			firstLine = firstLine.replace("{", "");
+			firstLine = firstLine.replace("}", "");
+			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+			for (String token : firstRow) {
+					String elem[] = token.split("=");
+					model.addColumn(elem[0]);
+				}
+						
+			// add rows data
+			//String 
+			for (String token : line) {
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+				
+				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
+				List<String> single_row = new ArrayList<String>();
+				for (String rowToken : row) {
+					System.out.println(rowToken);
+					String elem[] = rowToken.split("=");
+					if (elem.length > 1)
+						single_row.add(elem[1]);
+					else
+						single_row.add(elem[0]);
+				}
+				model.addRow(single_row.toArray());
+							
+			}
+			panel.add(sp);
 		}
 		
 		DatabaseManager.closeConnection();
