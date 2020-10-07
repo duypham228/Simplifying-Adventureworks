@@ -898,13 +898,13 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String [] splitfieldt2k2 = t2k2.split(" ");
 			String t2 = splitfieldt2k2[0];
 			String k2 = "";
-			if (splitfieldt1k1.length > 1)
+			if (splitfieldt2k2.length > 1)
 				k2 = splitfieldt2k2[1];
 			String t3k3 = joinTables_t3k3TF.getText();
 			String [] splitfieldt3k3 = t3k3.split(" ");
 			String t3 = splitfieldt3k3[0];
 			String k3 = "";
-			if (splitfieldt1k1.length > 1)
+			if (splitfieldt3k3.length > 1)
 				k3 = splitfieldt3k3[1];
 			String t4 = joinTables_t4TF.getText();
 			String query = "";
