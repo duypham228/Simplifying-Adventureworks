@@ -459,7 +459,6 @@ public final class DatabaseManager {
 			
 		// -- GET-VIEW --
 		case "jdb-get-view":
-			
 			Statement stmt;
 			String view = parsedValues[1];
 			String query = "";
@@ -479,11 +478,13 @@ public final class DatabaseManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			result = interpretResultSet(queryDatabase(query+";"));
+			for(int i=0; i<result.size(); i++) {
+				output+=result.get(i)+"\n";
+			}
 			break;
-			
 		// -- STAT --
 		case "jdb-stat":
-			
 			double mean = 0, median = 0;
 			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1] +" order by "+parsedValues[2]));
 			double min = (double) columninfo.get(0).get(parsedValues[2]);
@@ -597,10 +598,13 @@ public final class DatabaseManager {
 			}
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			output = "";
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
+				if (i < 1000)
+					output += result.get(i) + "\n";
 			}
-			break;
+			return output;
 			
 		// -- GET-REGION-INFO --
 		case "jdb-get-region-info":
@@ -633,10 +637,13 @@ public final class DatabaseManager {
 			newcommand = newcommand.replace('$', region.charAt(1));
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			output = "";
 			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
+				//System.out.println(result.get(i));
+				if (i < 1000)
+					output += result.get(i) + "\n";
 			}
-			break;
+			return output;
 			
 		// -- GET-INFO-BY-NAME --
 		case "jdb-get-info-by-name":
@@ -665,6 +672,8 @@ public final class DatabaseManager {
 			for (int i = 0; i < matches.size(); i++)
 			{
 				System.out.println(matches.get(i));
+				if (matches.get(i) != null)
+					output += matches.get(i) + "\n";
 			}
 			break;
 			
@@ -706,12 +715,7 @@ public final class DatabaseManager {
 			break;
 		}
 		
-		
-		//TODO:FORM SQL COMMAND HERE.
-		newcommand = "select * from address;"; //example query to test
-		rs = queryDatabase(newcommand);
-		//return interpretResultSet(rs);
-		return "Done.";
+		return output;
 	}
 	
 	
