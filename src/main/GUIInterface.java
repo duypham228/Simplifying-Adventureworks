@@ -65,6 +65,21 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JButton searchPath;
 	private static JLabel searchPath_LB;
 	private static JLabel searchPathResult;
+	
+	// jdb-search-and-join <table1> <table2>
+	private static JLabel sj_table1_LB;
+	private static JLabel sj_table2_LB;
+	private static JTextField sj_table1_TF;
+	private static JTextField sj_table2_TF;
+	private static JButton search_and_join;
+	private static JLabel search_and_join_LB;
+	private static JLabel search_and_join_result;
+	
+	// jdb-get-schedule
+	private static JLabel getSchedule_LB;
+	private static JTextField getSchedule_TF;
+	private static JButton getSchedule;
+	private static JLabel getScheduleResult;
 
 	// jdb-show-related-tables
 	private static JButton relatedTables;
@@ -224,6 +239,55 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		searchPathResult = new JLabel("");
 		searchPathResult.setBounds(110, 360, 500, 25);
 		gui.add(searchPathResult);
+		
+		////////////////////////////
+		//  jdb-search-and-join   //
+		////////////////////////////
+		sj_table1_LB = new JLabel("Table 1:");
+		sj_table1_LB.setBounds(450, 10, 200, 25);
+		gui.add(sj_table1_LB);
+		
+		sj_table1_TF = new JTextField(20);
+		sj_table1_TF.setBounds(525, 10, 165, 25);
+		gui.add(sj_table1_TF);
+		
+		sj_table2_LB = new JLabel("Table 2:");
+		sj_table2_LB.setBounds(450, 40, 150, 25);
+		gui.add(sj_table2_LB);
+		
+		sj_table2_TF = new JTextField(20);
+		sj_table2_TF.setBounds(525, 40, 165, 25);
+		gui.add(sj_table2_TF);
+		
+		// Button for show one or more columns from specific table
+		search_and_join = new JButton ("Search and Join");
+		search_and_join.setBounds(450, 70, 200, 25);
+		search_and_join.addMouseListener(new GUIInterface());
+		gui.add(search_and_join);
+		
+		////////////////////////////
+		//    jdb-get-schedule    //
+		////////////////////////////
+		getSchedule_LB = new JLabel("Purchase order ID:");
+		getSchedule_LB.setBounds(450, 100, 200, 25);
+		gui.add(getSchedule_LB);
+		
+		getSchedule_TF = new JTextField(20);
+		getSchedule_TF.setBounds(525, 100, 165, 25);
+		gui.add(getSchedule_TF);
+		
+		getSchedule = new JButton ("jdb-get-schedule");
+		getSchedule.setBounds(450, 130, 200, 25);
+		getSchedule.addMouseListener(new GUIInterface());
+		gui.add(getSchedule);
+		
+		getSchedule_LB = new JLabel("Result:");
+		getSchedule_LB.setBounds(450, 160, 150, 25);
+		gui.add(getSchedule_LB);
+
+		getScheduleResult = new JLabel("");
+		getScheduleResult.setBounds(450, 190, 500, 25);
+		gui.add(getScheduleResult);
 
 		/////////////////////////////
 		// jdb-show-related-tables //
@@ -330,6 +394,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		frame.setVisible(true);
 		gui.revalidate();
 		gui.repaint();
+		
+		
+		
 		///////////End of Commands/////////////
 
 		frame.setVisible(true);
@@ -557,6 +624,82 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			output = output.substring(0, output.length() - 3);
 			searchPathResult.setText(output);
 		}
+		/////////////////////////
+		// jdb-search-and-join //
+		/////////////////////////
+		else if (mouse.getSource() == search_and_join) {
+			JFrame frame = new JFrame();
+			GUIInterface panel = new GUIInterface();
+			frame.setVisible(true);
+			DefaultTableModel model = new DefaultTableModel();
+			
+			JTable table = new JTable(model);
+//			table1.setBounds(5, 5, 100, 300);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(1600,800));
+			
+//			model1.addColumn("Column");
+			
+			frame.add(panel);
+			frame.setSize(300, 300);
+
+			String tableName1 = sj_table1_TF.getText();
+			String tableName2 = sj_table2_TF.getText();
+			
+			
+			String output = DatabaseManager.handleCustomCommand("jdb-search-and-join " + tableName1 + " " + tableName2);
+			String[] line = output.split("\n");
+			String firstLine = line[0];
+			firstLine = firstLine.replace("{", "");
+			firstLine = firstLine.replace("}", "");
+			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
+			
+			for (String token : firstRow) {
+				//if (!token .equals (firstRow[0])) {
+					String elem[] = token.split("=");
+					if (elem.length > 1)
+						model.addColumn(elem[0]);
+				//}
+			}
+			
+			for (String token : line) {
+				// model.addRow(new Object[] {token});
+				token = token.replace("{", "");
+				token = token.replace("}", "");
+				String[] row = token.split(",");
+				
+				for (int i=0; i < row.length; i++) {
+					String[] elem = row[i].split("=");
+					
+					try {
+						row[i] = elem[1];
+					}
+					catch (Exception e){
+						;
+					}
+					// System.out.println(row[i]);
+				}
+				model.addRow(row);
+				
+			}
+			table.getColumnModel().getColumn(0).setPreferredWidth(200);
+//			System.out.println(output1);
+			panel.add(sp);
+		}
+		
+		//////////////////////////////////
+		// Handler for jdb-get-schedule //
+		//////////////////////////////////
+		else if (mouse.getSource() == getSchedule) {
+			String table1 = getSchedule_TF.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-get-schedule " + table1);
+			output = output.substring(0, output.length() - 3);
+			getScheduleResult.setText(output);
+		}
+		
+		
 		/////////////////////////////
 		// jdb-show-related-tables //
 		/////////////////////////////
@@ -841,7 +984,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		//DatabaseManager.closeConnection();
 
 		
-		DatabaseManager.closeConnection();
+		// DatabaseManager.closeConnection();
 
 	}
 
