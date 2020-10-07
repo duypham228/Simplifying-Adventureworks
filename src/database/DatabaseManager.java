@@ -211,7 +211,8 @@ public final class DatabaseManager {
 				output += primaryKeys.get(i) + "\n";
 			}
 			System.out.println(output);
-			break;
+			return output;
+//			break;
 			
 		// -- FIND-COLUMN --
 		case "jdb-find-column":

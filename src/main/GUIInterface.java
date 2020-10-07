@@ -15,6 +15,7 @@ import java.awt.Dimension;
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -65,6 +66,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	// jdb-show-related-tables
 	// using table1 text field
 	private static JButton relatedTables;
+	
+	// jdb-show-all-primary-keys
+	private static JButton primaryKeys;
 	
 	public GUIInterface() {
 		super();
@@ -196,6 +200,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		relatedTables.addMouseListener(new GUIInterface());
 		gui.add(relatedTables);
 		
+		///////////////////////////////
+		// jdb-show-all-primary-keys //
+		///////////////////////////////
+		primaryKeys = new JButton("jdb-show-all-primary-keys");
+		primaryKeys.setBounds(10, 420, 200, 25);
+		primaryKeys.addMouseListener(new GUIInterface());
+		gui.add(primaryKeys);
+		
+		gui.revalidate();
+		gui.repaint();
 		frame.setVisible(true);
 		
 	} //This escapes "static-ness" of main
@@ -446,6 +460,37 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 			table.getColumnModel().getColumn(0).setPreferredWidth(200);
 //			System.out.println(output1);
+			panel.add(sp);
+		}
+		else if (mouse.getSource() == primaryKeys) {
+			JFrame frame = new JFrame();
+			GUIInterface panel = new GUIInterface();
+			frame.setVisible(true);
+			DefaultTableModel model = new DefaultTableModel();
+			
+			
+			JTable table = new JTable(model);
+//			table.setBounds(5, 5, 100, 300);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			sp.setPreferredSize(new Dimension(250, 300));
+			
+			frame.add(panel);
+			frame.setSize(300, 300);
+			
+			model.addColumn("Table Name");
+			model.addColumn("Primary Key");
+			
+			
+			String output = DatabaseManager.handleCustomCommand("jdb-show-all-primary-keys");
+			String line[] = output.split("\n");
+			for (int i = 1; i < line.length; i++) { // ignore first line
+				String token = line[i];
+				String row[] = token.split(", ");
+				model.addRow(new Object[] {row[0], row[1]});
+				
+			}
 			panel.add(sp);
 		}
 		
