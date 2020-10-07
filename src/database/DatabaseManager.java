@@ -597,10 +597,13 @@ public final class DatabaseManager {
 			}
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			output = "";
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
+				if (i < 1000)
+					output += result.get(i) + "\n";
 			}
-			break;
+			return output;
 			
 		// -- GET-REGION-INFO --
 		case "jdb-get-region-info":

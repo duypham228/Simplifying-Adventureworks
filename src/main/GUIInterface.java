@@ -592,7 +592,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 					String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 					ArrayList<String> single_row = new ArrayList<String>();
 					for (String rowToken : row) {
-						String elem[] = rowToken.split(",[a-zA-Z0-9 ]*[^,]*=");
+						String elem[] = rowToken.split("=");
 						single_row.add(elem[1]);
 					}
 					model.addRow(single_row.toArray());
