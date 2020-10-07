@@ -637,9 +637,10 @@ public final class DatabaseManager {
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
 			output = "";
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < result.size(); i++) {
 				//System.out.println(result.get(i));
-				output += result.get(i) + "\n";
+				if (i < 1000)
+					output += result.get(i) + "\n";
 			}
 			return output;
 			
