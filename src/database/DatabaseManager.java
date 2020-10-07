@@ -670,6 +670,8 @@ public final class DatabaseManager {
 			for (int i = 0; i < matches.size(); i++)
 			{
 				System.out.println(matches.get(i));
+				if (matches.get(i) != null)
+					output += matches.get(i) + "\n";
 			}
 			break;
 			
