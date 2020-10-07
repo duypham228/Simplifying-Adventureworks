@@ -99,10 +99,12 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	//jdb-get-addresses
 	private static JLabel getAddresses_LB;
 	private static JTextField getAddresses_TF;
+	private static JTextField getAddresses_TF2;
 	private static JButton getAddresses;
 
 	//jdb-get-region-info
 	private static JLabel getRegion_LB;
+	private static JTextField getRegion_TF2;
 	private static JTextField getRegion_TF;
 	private static JButton getRegion;
 
@@ -348,13 +350,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		////////////////////////////
 		//    jdb-get-addresses   //
 		////////////////////////////
-		getAddresses_LB = new JLabel("Name of table:");
+		getAddresses_LB = new JLabel("Name of table and range:");
 		getAddresses_LB.setBounds(10, 540, 200, 25);
 		gui.add(getAddresses_LB);
 
-		getAddresses_TF = new JTextField(20);
-		getAddresses_TF.setBounds(110, 540, 200, 25);
+		getAddresses_TF = new JTextField("Table");
+		getAddresses_TF.setBounds(150, 540, 100, 25);
 		gui.add(getAddresses_TF);
+		
+		getAddresses_TF2 = new JTextField("Range (1 = 0-4999)");
+		getAddresses_TF2.setBounds(250, 540, 110, 25);
+		gui.add(getAddresses_TF2);
 
 		getAddresses = new JButton("jdb-get-addresses");
 		getAddresses.setBounds(10, 570, 200, 25);
@@ -364,13 +370,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		////////////////////////////
 		//  jdb-get-region-info   //
 		////////////////////////////
-		getRegion_LB = new JLabel("Enter Region:");
+		getRegion_LB = new JLabel("Enter Region and range:");
 		getRegion_LB.setBounds(10, 600, 200, 25);
 		gui.add(getRegion_LB);
 
-		getRegion_TF = new JTextField(20);
-		getRegion_TF.setBounds(110, 600, 200, 25);
+		getRegion_TF = new JTextField("Region");
+		getRegion_TF.setBounds(150, 600, 100, 25);
 		gui.add(getRegion_TF);
+		
+		getRegion_TF2 = new JTextField("Range (1 = 0-4999)");
+		getRegion_TF2.setBounds(250, 600, 110, 25);
+		gui.add(getRegion_TF2);
 
 		getRegion = new JButton("jdb-get-region-info");
 		getRegion.setBounds(10, 630, 200, 25);
@@ -385,11 +395,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.add(getInfo_LB);
 
 		getInfo_tableTF = new JTextField("table");
-		getInfo_tableTF.setBounds(150, 660, 200, 25);
+		getInfo_tableTF.setBounds(150, 660, 100, 25);
 		gui.add(getInfo_tableTF);
 
 		getInfo_attributeTF = new JTextField("name");
-		getInfo_attributeTF.setBounds(350, 660, 200, 25);
+		getInfo_attributeTF.setBounds(250, 660, 200, 25);
 		gui.add(getInfo_attributeTF);
 
 		getInfo = new JButton("jdb-get-info-by-name");
@@ -868,7 +878,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			sp.setPreferredSize(new Dimension(500, 300));
 
 			String tableName = getAddresses_TF.getText();
-			String output = DatabaseManager.handleCustomCommand("jdb-get-addresses " + tableName);
+			String range = getAddresses_TF2.getText();
+			//int rangenum = Integer.parseInt(range);
+			String output = DatabaseManager.handleCustomCommand("jdb-get-addresses " + tableName + " " + range);
 			String line[] = output.split("\n");
 
 			// add column names
@@ -891,7 +903,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
 					if (elem.length > 1)
 						single_row.add(elem[1]);
@@ -922,7 +933,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			sp.setPreferredSize(new Dimension(500, 300));
 
 			String regionName = getRegion_TF.getText();
-			String output = DatabaseManager.handleCustomCommand("jdb-get-region-info " + regionName);
+			String range = getRegion_TF2.getText();
+			String output = DatabaseManager.handleCustomCommand("jdb-get-region-info " + regionName + " " + range);
 			String line[] = output.split("\n");
 
 			// add column names
@@ -989,7 +1001,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 			for (String token : firstRow) {
 					String elem[] = token.split("=");
-					System.out.println("ColumnName: " + elem[0]);
+					//System.out.println("ColumnName: " + elem[0]);
 					if (elem.length > 1)
 						model.addColumn(elem[0]);
 				}
@@ -1004,7 +1016,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					System.out.println(rowToken);
+					//System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
 					if (elem.length > 1)
 						single_row.add(elem[1]);
@@ -1074,7 +1086,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 			for (String token : firstRow) {
 					String elem[] = token.split("=");
-					System.out.println("ColumnName: " + elem[0]);
+					//System.out.println("ColumnName: " + elem[0]);
 					if (elem.length > 1)
 						model.addColumn(elem[0]);
 				}
@@ -1089,7 +1101,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					System.out.println(rowToken);
+					//System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
 					if (elem.length > 1)
 						single_row.add(elem[1]);

@@ -555,9 +555,13 @@ public final class DatabaseManager {
 		
 		// -- GET-ADDRESSES	--
 		case "jdb-get-addresses":
-			
-			if(parsedValues.length!=2){
-				return "ERROR: jdb-get-addresses requires 1 argument";
+			boolean rangeProvided = true;
+			if(parsedValues.length < 2 && parsedValues.length > 3){
+				return "ERROR: jdb-get-addresses requires 2 or 3 arguments";
+			}
+			else if (parsedValues.length == 2)
+			{
+				rangeProvided = false;
 			}
 			String table = parsedValues[1];
 			if (table.equals("address")) {
@@ -601,19 +605,35 @@ public final class DatabaseManager {
 			}
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			int range = 0;
+			if (rangeProvided)
+				range = Integer.parseInt(parsedValues[2]) * 5000;
+			if (range - 1000 > result.size())
+				rangeProvided = false;
 			output = "";
 			for (int i = 0; i < result.size(); i++) {
-				System.out.println(result.get(i));
-				if (i < 1000)
+				if (rangeProvided) {
+					System.out.println(result.get(i));
+					if (i >= (range - 5000) && i < range)
+						output += result.get(i) + "\n";
+				}
+				else {
+					System.out.println(result.get(i));
 					output += result.get(i) + "\n";
+				}
 			}
 			return output;
 			
 		// -- GET-REGION-INFO --
 		case "jdb-get-region-info":
 			
-			if(parsedValues.length!=2){
-				return "ERROR: jdb-get-region-info requires 1 argument";
+			boolean rangeProvided2 = true;
+			if(parsedValues.length < 2 && parsedValues.length > 3){
+				return "ERROR: jdb-get-region-info requires 2 or 3 arguments";
+			}
+			else if (parsedValues.length == 2)
+			{
+				rangeProvided2 = false;
 			}
 			String region = parsedValues[1];
 			newcommand = "select countryregion.CountryRegionCode, countryregion.Name, 'CurrencyCode', 'TaxRate', "
@@ -628,7 +648,7 @@ public final class DatabaseManager {
 					+ "on salestaxrate.StateProvinceID = stateprovince.StateProvinceID join salesterritory on "
 					+ "salesterritory.CountryRegionCode = countryregion.CountryRegionCode join salesorderheader on "
 					+ "salesorderheader.TerritoryID = salesterritory.TerritoryID where countryregion.CountryRegionCode "
-					+ "LIKE 'AE' union select countryregion.CountryRegionCode, countryregion.Name, "
+					+ "LIKE '?$' union select countryregion.CountryRegionCode, countryregion.Name, "
 					+ "countryregioncurrency.CurrencyCode, salestaxrate.TaxRate AS 'TaxRate', salesorderheader.ContactID "
 					+ "AS 'Contact' from countryregion join countryregioncurrency on countryregion.CountryRegionCode = "
 					+ "countryregioncurrency.CountryRegionCode join stateprovince on stateprovince.CountryRegionCode = "
@@ -640,11 +660,22 @@ public final class DatabaseManager {
 			newcommand = newcommand.replace('$', region.charAt(1));
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			int range2 = 0;
+			if (rangeProvided2)
+				range2 = Integer.parseInt(parsedValues[2]) * 5000;
+			if (range2 - 1000 > result.size())
+				rangeProvided2 = false;
 			output = "";
 			for (int i = 0; i < result.size(); i++) {
-				//System.out.println(result.get(i));
-				if (i < 1000)
+				if (rangeProvided2) {
+					System.out.println(result.get(i));
+					if (i >= (range2 - 5000) && i < range2)
+						output += result.get(i) + "\n";
+				}
+				else {
+					System.out.println(result.get(i));
 					output += result.get(i) + "\n";
+				}
 			}
 			return output;
 			
