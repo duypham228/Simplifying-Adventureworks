@@ -16,21 +16,7 @@ package main;
 
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
-<<<<<<< HEAD
 
-	import java.util.ArrayList;
-	import java.util.List;
-	import java.util.Scanner;
-
-	import javax.swing.JButton;
-	import javax.swing.JFrame;
-	import javax.swing.JLabel;
-	import javax.swing.JPanel;
-	import javax.swing.JScrollPane;
-	import javax.swing.JTable;
-	import javax.swing.JTextField;
-	import javax.swing.table.DefaultTableModel;
-=======
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -43,7 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
->>>>>>> parent of eb792cd... added button for jdb-show-all-primary-keys
+
 
 //Manager Imports
 	import database.DatabaseManager;
@@ -82,7 +68,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 	// jdb-show-related-tables
 	private static JButton relatedTables;
-<<<<<<< HEAD
+
 	private static JTextField relatedTables_TF;
 	private static JLabel relatedTables_LB;
 
@@ -111,12 +97,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField getInfo_attributeTF;
 	private static JButton getInfo;
 
-	// jdb-show-all-primary-keys
-	private static JButton primaryKeys;
 
-=======
-	
->>>>>>> parent of eb792cd... added button for jdb-show-all-primary-keys
+
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -260,7 +242,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.add(relatedTables);
 
 		
-<<<<<<< HEAD
+
 		/////////////////////////////
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
@@ -349,10 +331,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.revalidate();
 		gui.repaint();
 		///////////End of Commands/////////////
-=======
+
 		frame.setVisible(true);
 		
->>>>>>> parent of eb792cd... added button for jdb-show-all-primary-keys
+
 	} //This escapes "static-ness" of main
 
 	//Could make listeners frame-synchronized or based on press & release combo
@@ -608,7 +590,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 //			System.out.println(output1);
 			panel.add(sp);
 		}
-<<<<<<< HEAD
+
 		/////////////////////////////
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
@@ -857,10 +839,10 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		}
 
 		//DatabaseManager.closeConnection();
-=======
+
 		
 		DatabaseManager.closeConnection();
->>>>>>> parent of eb792cd... added button for jdb-show-all-primary-keys
+
 	}
 
 	@Override
