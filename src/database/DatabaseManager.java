@@ -452,10 +452,13 @@ public final class DatabaseManager {
 			}
 			rs = queryDatabase(command2);
 			result = interpretResultSet(rs);
+			String res = "";
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
+				res += result.get(i) + "\n";
 			}
-			break;
+			res += "\b";
+			return res;
 			
 		// -- GET-VIEW --
 		case "jdb-get-view":
@@ -693,10 +696,13 @@ public final class DatabaseManager {
 				+" AND purchaseorderdetail.PurchaseOrderID="+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			String res2 = result.get(0).get("OrderDate")+" ===== "+ (long) result.get(0).get("OrderToShip")/1000000.0 + " DAYS ===== "
+					+result.get(0).get("ShipDate") + " ===== " + (long) result.get(0).get("ShipToFinish")/1000000.0 + " DAYS ====== "
+					+ result.get(0).get("DueDate");
 			System.out.println(result.get(0).get("OrderDate")+" ===== "+ (long) result.get(0).get("OrderToShip")/1000000.0 + " DAYS ===== "
 						+result.get(0).get("ShipDate") + " ===== " + (long) result.get(0).get("ShipToFinish")/1000000.0 + " DAYS ====== "
 						+ result.get(0).get("DueDate"));
-			break;
+			return res2;
 			
 		// -- LOCATE-STORE --
 		case "jdb-locate-store":
