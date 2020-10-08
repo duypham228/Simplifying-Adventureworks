@@ -216,8 +216,8 @@ public final class DatabaseManager {
 			
 		// -- FIND-COLUMN --
 		case "jdb-find-column":
-			
 			if(parsedValues.length!=2){
+				System.out.println(parsedValues.length);
 				return "ERROR: jdb-find-column requires 1 argument";
 			}
 			String column = parsedValues[1];

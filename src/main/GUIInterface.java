@@ -2,7 +2,11 @@ package main;
 
 	import java.awt.Color;
 	import java.awt.Dimension;
-	import java.awt.Toolkit;
+import java.awt.Image;
+import java.awt.Toolkit;
+	import java.io.File;
+	import java.io.FileWriter;
+	import java.io.IOException; 
 
 //Standard Library Imports
 	import java.awt.event.KeyEvent;
@@ -28,12 +32,16 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.statistics.HistogramDataset;
 	//import org.jfree.util.Rotation;
 import org.jfree.data.statistics.HistogramType;
+	
+	import java.awt.image.BufferedImage;
+	import javax.imageio.ImageIO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.Box;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -146,6 +154,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField statName_TF;
 	private static JTextField colName_TF;
 	
+	//jdb-plot-schema
+	private static JButton plotSchema;
+
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -476,6 +487,13 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		joinTables.addMouseListener(new GUIInterface());
 		gui.add(joinTables);
 		
+		////////////////////////////
+		//     jdb-plot-schema    //
+		////////////////////////////	
+		plotSchema = new JButton("jdb-plot-schema");
+		plotSchema.setBounds(450, 250, 150, 25);
+		plotSchema.addMouseListener(new GUIInterface());
+		gui.add(plotSchema);
 
 		//JTable table = new JTable();
 		frame.setVisible(true);
@@ -1223,7 +1241,84 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 			panel.add(sp);
 		}
-
+		////////////////////////////
+		//     jdb-plot-schema    //
+		////////////////////////////	
+		else if (mouse.getSource() == plotSchema) {
+			ArrayList<String> columnNames = new ArrayList<String>();
+			String output = DatabaseManager.handleCustomCommand("jdb-show-all-primary-keys");
+			String[] lines = output.split("\n");
+			String finalOutput = "";
+			for (int i = 1; i < lines.length; i++) {
+				String token = lines[i];
+				String[] columns = token.split(",");
+				//System.out.println(columns[1]);
+				columnNames.add(columns[1]);
+			}
+			String findResults = "";
+			String[] resultsArray;
+			String[] splitResults;
+			for (int i = 0; i < columnNames.size(); i++) {
+				ArrayList<String> dotpi = new ArrayList<String>();
+				findResults = DatabaseManager.handleCustomCommand("jdb-find-column " + columnNames.get(i).trim());
+				resultsArray = findResults.split("\n");
+				for (String token : resultsArray) {
+					splitResults = token.split(" ");
+					if (splitResults[0].length() > 0) {
+						dotpi.add(splitResults[0]);
+						//System.out.println("final loop: " + splitResults[0]);
+					}
+				}
+				String finalResult = "";
+				for (int k = 0; k < dotpi.size(); k++) {
+					if (k == dotpi.size() - 1) {
+						finalResult += dotpi.get(k);
+					}
+					else {
+						finalResult += dotpi.get(k) + " -- ";
+					}
+				}
+				finalOutput += finalResult + "\n";
+			}
+			System.out.println(finalOutput);
+			try {
+			File schemaDot = new File("external/schema.dot");
+			schemaDot.createNewFile();
+			FileWriter schemaWrite = new FileWriter("external/schema.dot");
+			schemaWrite.write("graph {\n");
+			schemaWrite.write(finalOutput);
+			schemaWrite.write("}");
+			schemaWrite.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Runtime term = Runtime.getRuntime();
+			try {
+			term.exec("cmd /c start \"\" generategraph.bat");
+			Thread.sleep(1000);
+			File f;
+			found:
+			while (true) {
+				f = new File("external/schema.png");
+				if (f.exists()) {
+					break found;
+				}
+			}
+			Image image;
+			image = ImageIO.read(f);
+			image = image.getScaledInstance(1200, 800, Image.SCALE_SMOOTH);
+			JFrame frame = new JFrame();
+			GUIInterface gui = new GUIInterface();
+			JLabel imageHolder = new JLabel();
+			imageHolder.setIcon(new javax.swing.ImageIcon(image));
+			gui.add(imageHolder);
+			frame.add(gui);
+			frame.setVisible(true);
+			frame.setSize(1200, 800);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		//DatabaseManager.closeConnection();
 
 		
