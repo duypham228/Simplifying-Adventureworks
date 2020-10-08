@@ -551,6 +551,17 @@ public final class DatabaseManager {
 				temp = histogram.length();
 			}
 			System.out.println(histogram);
+			output+=min+"\n"+max+"\n"+mean+"\n"+median+"\n";
+			for(int i = 0; i < columninfo.size(); i++) {
+				if(i != columninfo.size()-1) {
+					output+=(double) columninfo.get(i).get(parsedValues[2])+",";
+				}
+				else {
+					output+=(double) columninfo.get(i).get(parsedValues[2])+"\n";
+				}
+			}
+//			output+="0,"+yfreq+","+2*yfreq+","+3*yfreq+","+4*yfreq+","+5*yfreq+","+6*yfreq+"\n";
+//			output+="0,"+xfreq+","+2*xfreq+","+3*xfreq+","+4*xfreq+","+5*xfreq+"\n";
 			break; 
 		
 		// -- GET-ADDRESSES	--

@@ -16,11 +16,24 @@ package main;
 
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
+import java.text.NumberFormat;
+
+//histogram
+	import org.jfree.chart.ChartFactory;
+	import org.jfree.chart.ChartPanel;
+	import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.statistics.HistogramDataset;
+	//import org.jfree.util.Rotation;
+import org.jfree.data.statistics.HistogramType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,12 +42,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.border.*;
 
 
 //Manager Imports
 	import database.DatabaseManager;
 	import page.PageManager;
 	import error.ErrorManager;
+
 
 public class GUIInterface extends JPanel implements MouseListener, MouseWheelListener, KeyListener {
 
@@ -121,8 +136,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JTextField joinTables_t3k3TF;
 	private static JTextField joinTables_t4TF;
 	private static JButton joinTables;
-
-
+	
+	//jdb-stat
+	private static JFreeChart chart;
+	private static ChartPanel chartPanel;
+	private static HistogramDataset dataset;
+	private static JButton getStat;
+	private static JLabel stat_LB;
+	private static JTextField statName_TF;
+	private static JTextField colName_TF;
+	
 	public GUIInterface() {
 		super();
 		frame.addKeyListener(this);
@@ -139,6 +162,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		frame.setVisible(true);
 		this.repaint();
 	}
+	
 	public static void main(String[]args) {
 		DatabaseManager.openConnection();
 		DatabaseManager.queryDatabase("use adventureworks;");
@@ -151,9 +175,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 		frame.add(gui);
 		gui.setLayout(null);
-
-
-//
 
 		// Text field for input text
 		textfield1 = new JTextField(20);
@@ -314,8 +335,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		relatedTables.addMouseListener(new GUIInterface());
 		gui.add(relatedTables);
 
-		
-
+	
 		/////////////////////////////
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
@@ -344,7 +364,28 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		gui.add(view_LB);
 		gui.add(viewName_TF);
 		gui.add(viewQuery_TF);
+		
+		////////////////
+		//  jdb-stat  //
+		////////////////
+		stat_LB = new JLabel("jdb-stat:");
+		stat_LB.setBounds(300, 480, 70, 25);
+	
+		statName_TF = new JTextField("View or Table Name");
+		statName_TF.setBounds(375, 480, 150, 25);
 
+		colName_TF = new JTextField("Column Name");
+		colName_TF.setBounds(530, 480, 110, 25);
+		
+		getStat = new JButton("jdb-stat");
+		getStat.setBounds(300, 510, 200, 25);
+		getStat.addMouseListener(new GUIInterface());
+//        dataset = new HistogramDataset();
+//        chart = createChart(dataset, );
+		gui.add(getStat);
+		gui.add(stat_LB);
+		gui.add(statName_TF);
+		gui.add(colName_TF);
 
 
 		////////////////////////////
@@ -858,7 +899,76 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
 			panel.add(sp);
 		}
-//		DatabaseManager.closeConnection();
+		////////////////
+		//jdb-get-stat//
+		////////////////
+		else if(mouse.getSource() == getStat) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			String output = DatabaseManager.handleCustomCommand("jdb-stat "+statName_TF.getText()+" "+colName_TF.getText());
+			
+			String line[] = output.split("\n");
+			System.out.println("start");
+			for(int i=0; i<line.length; i++) {
+				System.out.println(line[i]);
+			}
+			double min = Double.parseDouble(line[1]);
+			double max = Double.parseDouble(line[2]);
+			double mean = Double.parseDouble(line[3]);
+			double median = Double.parseDouble(line[4]);
+			String dataStr[] = line[5].split(",");
+			double[] data = new double[dataStr.length];
+			for(int i=0; i<dataStr.length; i++) {
+				data[i] = Double.parseDouble(dataStr[i]);
+			}
+			
+			//creates histogram data and adds series
+			dataset = new HistogramDataset();
+			dataset.setType(HistogramType.RELATIVE_FREQUENCY);
+	        dataset.addSeries("Number Density", data, data.length, min, max); 
+	        
+	        //create and customize chart settings
+			chart = ChartFactory.createHistogram(	
+					statName_TF.getText(), null, null, dataset, PlotOrientation.HORIZONTAL, true, false, false);
+			XYPlot plot = (XYPlot) chart.getPlot();
+	        plot.setForegroundAlpha(0.75f);
+	        NumberAxis axis = (NumberAxis) plot.getDomainAxis();
+	        axis.setAutoRangeIncludesZero(false);
+	        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+	        rangeAxis.setNumberFormatOverride(NumberFormat.getPercentInstance());
+	        
+	        //adding chart to panel
+			chartPanel = new ChartPanel(chart);
+			chartPanel.setPreferredSize(new Dimension(500, 300));
+	        chartPanel.setMouseZoomable(true, false);
+	        chartPanel.setBounds(0, 0, 500, 300);
+	   
+			frame.setSize(500, 350);
+			frame.add(panel);
+			frame.setTitle(viewName_TF.getText());
+			frame.setResizable(false);
+
+			panel.add(chartPanel);
+			JLabel min_LB = new JLabel("min = "+min);
+			min_LB.setBounds(550, 20, 50, 20);
+			JLabel max_LB = new JLabel("max = "+max);
+			max_LB.setBounds(570, 20, 50, 20);
+			JLabel mean_LB = new JLabel("mean = "+mean);
+			mean_LB.setBounds(590, 20, 50, 20);
+			JLabel median_LB = new JLabel("median = "+median);
+			median_LB.setBounds(610, 20, 50, 20);
+			
+			
+			panel.add(Box.createHorizontalStrut(5));
+			panel.add(min_LB);
+			panel.add(Box.createHorizontalStrut(5));
+			panel.add(max_LB);
+			panel.add(Box.createHorizontalStrut(5));
+			panel.add(median_LB);
+			panel.add(Box.createHorizontalStrut(5));
+			panel.add(mean_LB);
+		}
 		////////////////////////////
 		//    jdb-get-addresses   //
 		////////////////////////////
