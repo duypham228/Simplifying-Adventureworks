@@ -156,7 +156,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	private static JButton plotSchema;
 	
 	//jdb-locate-store
-	
+	private static JButton locateStore;
+	private static JTextField locateStore_TF;
 
 	public GUIInterface() {
 		super();
@@ -495,6 +496,18 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 		plotSchema.setBounds(450, 250, 150, 25);
 		plotSchema.addMouseListener(new GUIInterface());
 		gui.add(plotSchema);
+		
+		////////////////////////////
+		//    jdb-locate-store    //
+		////////////////////////////	
+		locateStore_TF = new JTextField("Enter ProductID");
+		locateStore_TF.setBounds(450, 280, 200, 25);
+		gui.add(locateStore_TF);
+		
+		locateStore = new JButton("jdb-locate-store");
+		locateStore.setBounds(450, 310, 150, 25);
+		locateStore.addMouseListener(new GUIInterface());
+		gui.add(locateStore);
 
 		//JTable table = new JTable();
 		frame.setVisible(true);
@@ -1319,6 +1332,55 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		////////////////////////////
+		//    jdb-locate-store    //
+		////////////////////////////
+		else if (mouse.getSource() == locateStore) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(500, 350);
+			frame.add(panel);
+
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			sp.setPreferredSize(new Dimension(500, 300));
+
+			String productID = locateStore_TF.getText();
+			//int rangenum = Integer.parseInt(range);
+			String output = DatabaseManager.handleCustomCommand("jdb-locate-store " + productID);
+			System.out.println ("YOOOOOOOOOOOOOOO");
+			String line[] = output.split("\n");
+			System.out.println(output);
+			
+			// add column names
+			model.addColumn("Name");
+
+			// add rows data
+			//String
+			for (String token : line) {
+				if (token.length() > 1) {
+					token = token.replace("{", "");
+					token = token.replace("}", "");
+
+					String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
+					List<String> single_row = new ArrayList<String>();
+					for (String rowToken : row) {
+						String elem[] = rowToken.split("=");
+						if (elem.length > 1)
+							single_row.add(elem[1]);
+						else
+							single_row.add(elem[0]);
+					}
+					model.addRow(single_row.toArray());
+				}
+			}
+			panel.add(sp);
 		}
 		//DatabaseManager.closeConnection();
 

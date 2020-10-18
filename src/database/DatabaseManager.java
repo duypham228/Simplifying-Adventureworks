@@ -757,10 +757,13 @@ public final class DatabaseManager {
 					+ "salesorderdetail.ProductID Like "+parsedValues[1]+";";
 			rs = queryDatabase(newcommand);
 			result = interpretResultSet(rs);
+			String line = "";
 			for (int i = 0; i < result.size(); i++) {
 				System.out.println(result.get(i));
+				if (result.get(i) != null)
+					output += result.get(i) + "\n";
 			}
-			break;
+			return output;
 		}
 		
 		return output;
