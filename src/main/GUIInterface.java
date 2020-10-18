@@ -1354,9 +1354,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String productID = locateStore_TF.getText();
 			//int rangenum = Integer.parseInt(range);
 			String output = DatabaseManager.handleCustomCommand("jdb-locate-store " + productID);
-			System.out.println ("YOOOOOOOOOOOOOOO");
 			String line[] = output.split("\n");
-			System.out.println(output);
 			
 			// add column names
 			model.addColumn("Name");

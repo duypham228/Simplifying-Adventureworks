@@ -47,16 +47,20 @@ public final class DatabaseManager {
 			db = DriverManager.getConnection("jdbc:mysql://localhost/?user=root&password=password"); //TODO: make sure this url is right
 			
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		}
 		
@@ -80,7 +84,8 @@ public final class DatabaseManager {
 			}
 			return list;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(8));
 			e.printStackTrace();
 		}
 		return list;
@@ -92,7 +97,8 @@ public final class DatabaseManager {
 		try {
 			return db.createStatement().executeQuery(command);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(8));
 			e.printStackTrace();
 		}
 		return null;
@@ -124,7 +130,9 @@ public final class DatabaseManager {
 			};
 		
 		if(parsedValues.length == 0) {
-			return "ERROR: Invalid arguments (parsedValues.length = 0)";
+			ErrorManager error = new ErrorManager();
+			return error.getErrorMessage(2);
+			//return "ERROR: Invalid arguments (parsedValues.length = 0)";
 		}
 		
 		out:
@@ -136,7 +144,9 @@ public final class DatabaseManager {
 		}
 		
 		if(!validCommandPrefix) {
-			return "ERROR: Invalid command \"" + parsedValues[0] + "\"";
+			ErrorManager error = new ErrorManager();
+			return error.getErrorMessage(3);
+			//return "ERROR: Invalid command \"" + parsedValues[0] + "\"";
 		}
 	
 		
@@ -160,7 +170,10 @@ public final class DatabaseManager {
 		case "jdb-show-related-tables":
 			
 			if(parsedValues.length!=2){
-				return "ERROR: jdb-show-related-tables requires 1 argument";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(5));
+				return error.getErrorMessage(5);
+				//return "ERROR: jdb-show-related-tables requires 1 argument";
 			}
 			String input_table_name = parsedValues[1];
 			ArrayList<HashMap <String, Object>> input_table = interpretResultSet(queryDatabase("show columns from " + input_table_name + ";"));
@@ -195,7 +208,10 @@ public final class DatabaseManager {
 		case "jdb-show-all-primary-keys":
 			
 			if(parsedValues.length!=1){
-				return "ERROR: jdb-show-all-primary-keys requires 0 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(4));
+				return error.getErrorMessage(4);
+				//return "ERROR: jdb-show-all-primary-keys requires 0 arguments";
 			}
 			for(int i=0; i<all_tables.size(); i++) {	//loops through all tables
 				String curr_table_name = all_tables.get(i).get("TABLE_NAME").toString();
@@ -217,8 +233,10 @@ public final class DatabaseManager {
 		// -- FIND-COLUMN --
 		case "jdb-find-column":
 			if(parsedValues.length!=2){
-				System.out.println(parsedValues.length);
-				return "ERROR: jdb-find-column requires 1 argument";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(5));
+				return error.getErrorMessage(5);
+				//return "ERROR: jdb-find-column requires 1 argument";
 			}
 			String column = parsedValues[1];
 		    ArrayList<String> table_with_column = new ArrayList<String>(5);
@@ -243,7 +261,10 @@ public final class DatabaseManager {
 		case "jdb-search-path":
 			
 			if(parsedValues.length!=3){
-				return "ERROR: jdb-search-path requires 2 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(6));
+				return error.getErrorMessage(6);
+				//return "ERROR: jdb-search-path requires 2 arguments";
 			}
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
@@ -335,7 +356,10 @@ public final class DatabaseManager {
 		case "jdb-search-and-join":
 			
 			if(parsedValues.length!=3) {
-				return "ERROR: jdb-search-and-join requires 2 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(6));
+				return error.getErrorMessage(6);
+				//return "ERROR: jdb-search-and-join requires 2 arguments";
 			}	
 			//GETS ALL PRIMARY KEYS.
 			for(int i=0; i<all_tables.size(); i++) {	
@@ -462,6 +486,11 @@ public final class DatabaseManager {
 			
 		// -- GET-VIEW --
 		case "jdb-get-view":
+			if(parsedValues.length!=2) {
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(5));
+				return error.getErrorMessage(5);
+			}
 			Statement stmt;
 			String view = parsedValues[1];
 			String query = "";
@@ -488,6 +517,11 @@ public final class DatabaseManager {
 			break;
 		// -- STAT --
 		case "jdb-stat":
+			if(parsedValues.length!=1){
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(4));
+				return error.getErrorMessage(4);
+			}
 			double mean = 0, median = 0;
 			ArrayList<HashMap<String, Object>> columninfo = interpretResultSet(queryDatabase("select " + parsedValues[2] + " from " + parsedValues[1] +" order by "+parsedValues[2]));
 			double min = (double) columninfo.get(0).get(parsedValues[2]);
@@ -568,7 +602,10 @@ public final class DatabaseManager {
 		case "jdb-get-addresses":
 			boolean rangeProvided = true;
 			if(parsedValues.length < 2 && parsedValues.length > 3){
-				return "ERROR: jdb-get-addresses requires 2 or 3 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(7));
+				return error.getErrorMessage(7);
+				//return "ERROR: jdb-get-addresses requires 2 or 3 arguments";
 			}
 			else if (parsedValues.length == 2)
 			{
@@ -640,7 +677,10 @@ public final class DatabaseManager {
 			
 			boolean rangeProvided2 = true;
 			if(parsedValues.length < 2 && parsedValues.length > 3){
-				return "ERROR: jdb-get-region-info requires 2 or 3 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(7));
+				return error.getErrorMessage(7);
+				//return "ERROR: jdb-get-region-info requires 2 or 3 arguments";
 			}
 			else if (parsedValues.length == 2)
 			{
@@ -695,7 +735,10 @@ public final class DatabaseManager {
 			
 			String name = "";
 			if (parsedValues.length < 3) {
-				return "ERROR: jdb-get-info-by-name requires 2 arguments";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(6));
+				return error.getErrorMessage(6);
+				//return "ERROR: jdb-get-info-by-name requires 2 arguments";
 			}
 			else if (parsedValues.length >= 3) {
 				for (int i = 2; i < parsedValues.length; i++)
@@ -726,7 +769,10 @@ public final class DatabaseManager {
 		case "jdb-get-schedule":
 			
 			if(parsedValues.length!=2){
-				return "ERROR: jdb-get-schedule requires 1 argument";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(5));
+				return error.getErrorMessage(5);
+				//return "ERROR: jdb-get-schedule requires 1 argument";
 			}
 			newcommand = "SELECT DISTINCT purchaseorderheader.OrderDate,"
 				+"purchaseorderheader.ShipDate-purchaseorderheader.OrderDate AS OrderToShip,"
@@ -750,7 +796,10 @@ public final class DatabaseManager {
 		case "jdb-locate-store":
 			
 			if(parsedValues.length!=2){
-				return "ERROR: jdb-locate-store requires 1 argument";
+				ErrorManager error = new ErrorManager();
+				System.out.println (error.getErrorMessage(5));
+				return error.getErrorMessage(5);
+				//return "ERROR: jdb-locate-store requires 1 argument";
 			}
 			newcommand = "select store.Name from salesorderdetail join salesorderheader on salesorderdetail.SalesOrderID = "
 					+ "salesorderheader.SalesOrderID join store on store.CustomerID = salesorderheader.CustomerID where "
@@ -812,7 +861,8 @@ public final class DatabaseManager {
 			db.close();
 			System.out.println("Connection Closed.");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(9));
 			e.printStackTrace();
 		}
 	}
@@ -827,16 +877,20 @@ public final class DatabaseManager {
 			db = DriverManager.getConnection("jdbc:mysql://localhost/?user=root&password=password"); //TODO: make sure this url is right
 			
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			ErrorManager error = new ErrorManager();
+			System.out.println(error.getErrorMessage(1));
 			e.printStackTrace();
 		}
 	}
