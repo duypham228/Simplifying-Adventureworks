@@ -30,9 +30,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.statistics.HistogramDataset;
-	//import org.jfree.util.Rotation;
 import org.jfree.data.statistics.HistogramType;
-	
 	import java.awt.image.BufferedImage;
 	import javax.imageio.ImageIO;
 
@@ -1299,7 +1297,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			File f;
 			found:
 			while (true) {
-				f = new File("external/schema.png");
+				f = new File("external/schema.dot.png");
 				if (f.exists()) {
 					break found;
 				}
