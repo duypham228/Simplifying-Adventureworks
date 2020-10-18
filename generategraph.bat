@@ -1,1 +1,1 @@
-dot -Tpng external\schema.dot -O
+dot -Tjpg -o external\schema.jpg external\schema.dot

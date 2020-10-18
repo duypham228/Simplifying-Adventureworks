@@ -154,6 +154,9 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	
 	//jdb-plot-schema
 	private static JButton plotSchema;
+	
+	//jdb-locate-store
+	
 
 	public GUIInterface() {
 		super();
@@ -1297,7 +1300,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			File f;
 			found:
 			while (true) {
-				f = new File("external/schema.dot.png");
+				f = new File("external/schema.jpg");
 				if (f.exists()) {
 					break found;
 				}
