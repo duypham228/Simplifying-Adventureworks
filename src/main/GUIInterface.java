@@ -1,13 +1,17 @@
 package main;
 
+	import java.awt.BorderLayout;
+	import java.awt.CardLayout;
 	import java.awt.Color;
+	import java.awt.Container;
 	import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
+	import java.awt.Image;
+	import java.awt.Toolkit;
 	import java.io.File;
 	import java.io.FileWriter;
-	import java.io.IOException; 
-
+	import java.io.IOException;
+	import java.awt.event.ItemEvent;
+	import java.awt.event.ItemListener;
 //Standard Library Imports
 	import java.awt.event.KeyEvent;
 	import java.awt.event.KeyListener;
@@ -20,35 +24,39 @@ import java.awt.Toolkit;
 
 	import java.awt.event.WindowAdapter;
 	import java.awt.event.WindowEvent;
-import java.text.NumberFormat;
+	import java.text.NumberFormat;
 
 //histogram
 	import org.jfree.chart.ChartFactory;
 	import org.jfree.chart.ChartPanel;
 	import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.statistics.HistogramType;
+	import org.jfree.chart.axis.NumberAxis;
+	import org.jfree.chart.plot.PlotOrientation;
+	import org.jfree.chart.plot.XYPlot;
+	import org.jfree.data.statistics.HistogramDataset;
+	//import org.jfree.util.Rotation;
+	import org.jfree.data.statistics.HistogramType;
 	import java.awt.image.BufferedImage;
 	import javax.imageio.ImageIO;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-import javax.swing.Box;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.border.*;
+	import java.util.ArrayList;
+	import java.util.List;
+	import java.util.Scanner;
+	
+	import javax.swing.Box;
+	
+	import javax.swing.JButton;
+	import javax.swing.JComboBox;
+	import javax.swing.JFrame;
+	import javax.swing.JLabel;
+	import javax.swing.JPanel;
+	import javax.swing.JScrollPane;
+	import javax.swing.JTable;
+	import javax.swing.JTextField;
+	import javax.swing.UIManager;
+	import javax.swing.UnsupportedLookAndFeelException;
+	import javax.swing.table.DefaultTableModel;
+	import javax.swing.border.*;
 
 
 //Manager Imports
@@ -57,14 +65,14 @@ import javax.swing.border.*;
 	import error.ErrorManager;
 
 
-public class GUIInterface extends JPanel implements MouseListener, MouseWheelListener, KeyListener {
+public class GUIInterface extends JPanel implements MouseListener, MouseWheelListener, KeyListener, ItemListener {
 
-	private static JFrame frame = new JFrame();
-//	private static JPanel panel;
-
-	private static JButton findColumn;
+	//private static JFrame frame = new JFrame();
+	
 	private static JButton listTables;
-	private static JTextField textfield1;
+	private static JLabel fcLB;
+	private static JTextField fcTF;
+	private static JButton findColumn;
 
 	// show one or more columns of specific table
 	private static JLabel columns_LB;
@@ -158,369 +166,401 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	//jdb-locate-store
 	private static JButton locateStore;
 	private static JTextField locateStore_TF;
-
-	public GUIInterface() {
-		super();
-		frame.addKeyListener(this);
-		frame.addMouseListener(this);
-		frame.addMouseWheelListener(this);
-		frame.addWindowListener(new WindowAdapter() {
+	private static JLabel locateStore_LB;
+	
+	
+	JPanel cards; //a panel that uses CardLayout
+    final static String FUNCTIONS = "JDBC Functions";
+    final static String DASHBOARD = "Dashboard";
+    public void addComponentToPane(Container pane) {
+        //Put the JComboBox in a JPanel to get a nicer look.
+        JPanel menu = new JPanel(); //use FlowLayout, could maybe add more things to this
+        String pages[] = { DASHBOARD, FUNCTIONS };
+        JComboBox cb = new JComboBox(pages);
+        cb.setEditable(false);
+        cb.addItemListener(this);
+        menu.add(cb);
+         
+        //Create the "cards". TODO: maybe add a menu card
+        JPanel card1 = new JPanel();
+        createFunctionsPage(card1);
+        JPanel card2 = new JPanel();
+        createDashboardPage(card2);
+         
+        //Create the panel that contains the "cards".
+        cards = new JPanel(new CardLayout());
+        cards.add(card2, DASHBOARD);
+        cards.add(card1, FUNCTIONS);
+         
+        pane.add(menu, BorderLayout.PAGE_START);
+        pane.add(cards, BorderLayout.CENTER);
+    }
+    public void itemStateChanged(ItemEvent evt) {
+        CardLayout cl = (CardLayout)(cards.getLayout());
+        cl.show(cards, (String)evt.getItem());
+    }
+    private static void createAndShowGUI() {
+        //Create and set up the window.
+        JFrame frame = new JFrame("CSCE 315 Project 2 - SAW (Simplifying Adventure Works) GUI Interface");
+        frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				frame.dispose();
 				DatabaseManager.closeConnection();
+				System.exit(0);
 			}
 		});
-		frame.add(this);
-		frame.setSize(700, 850);
-		frame.setVisible(true);
-		this.repaint();
-	}
-	
-	public static void main(String[]args) {
-		DatabaseManager.openConnection();
-		DatabaseManager.queryDatabase("use adventureworks;");
+        //Create and set up the content pane.
+        GUIInterface demo = new GUIInterface();
+        demo.addComponentToPane(frame.getContentPane());
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+    }
 
-		int windowWidth = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 2);
-		frame.getContentPane().setPreferredSize( new Dimension( windowWidth, (int) (windowWidth / (8.0/6.0)) ) );
-		GUIInterface gui = new GUIInterface();
-		frame.setTitle("SAW: Simiplifying Adventure Works");
-//		panel = new JPanel();
+    public static void createDashboardPage(JPanel card) {
+    	Dashboard.runDash(card);
+    }
+    public static void createFunctionsPage(JPanel card) {
+    	card.setLayout(null);
+    	card.setPreferredSize(new Dimension(810, 650));
+    	
+/*--------------------------3rd column start-----------------------------------------*/
+    	
+		////////////////////////////
+		//    jdb-locate-store    //
+		////////////////////////////	
+    	locateStore_LB = new JLabel("ProductID: ");
+    	locateStore_LB.setBounds(700, 10, 70, 25);
+    	card.add(locateStore_LB);
+    	
+		locateStore_TF = new JTextField("710");
 
-		frame.add(gui);
-		gui.setLayout(null);
-
-		// Text field for input text
-		textfield1 = new JTextField(20);
-		textfield1.setBounds(10, 50, 150, 25);
-		gui.add(textfield1);
-
-		// Button for jdb-find-column
-		findColumn = new JButton("jdb-find-column");
-		findColumn.setBounds(10, 80, 200, 25);
-		findColumn.addMouseListener(new GUIInterface());
-		gui.add(findColumn);
-
-		// Button for show list of table
-		listTables = new JButton("Show List of Tables");
-		listTables.setBounds(10, 20, 200, 25);
-		listTables.addMouseListener(new GUIInterface());
-		gui.add(listTables);
-
-
-		/////////////////////////////////////////////////
-		// Show one or more columns for specific table //
-		/////////////////////////////////////////////////
-
-		columns_LB = new JLabel("Column Name:");
-		columns_LB.setBounds(10, 110, 150, 25);
-		gui.add(columns_LB);
-
-		columns_TF = new JTextField(20);
-		columns_TF.setBounds(110, 110, 165, 25);
-		gui.add(columns_TF);
-
-		table_LB = new JLabel("Table Name:");
-		table_LB.setBounds(10, 150, 150, 25);
-		gui.add(table_LB);
-
-		table_TF = new JTextField(20);
-		table_TF.setBounds(110, 150, 165, 25);
-		gui.add(table_TF);
-
-		// Button for show one or more columns from specific table
-		showColumns = new JButton ("Show one or more Columns of Specific Table");
-		showColumns.setBounds(10, 180, 200, 25);
-		showColumns.addMouseListener(new GUIInterface());
-		gui.add(showColumns);
-
-		/////////////////////////////
-		// Process Raw SQL queries //
-		/////////////////////////////
-		query_LB = new JLabel("SQL query input:");
-		query_LB.setBounds(10, 210, 150, 25);
-		gui.add(query_LB);
-
-		query_TF = new JTextField(20);
-		query_TF.setBounds(110, 210, 165, 25);
-		gui.add(query_TF);
-
-		// Button for show one or more columns from specific table
-		query = new JButton ("Raw SQL Query");
-		query.setBounds(10, 240, 200, 25);
-		query.addMouseListener(new GUIInterface());
-		gui.add(query);
-
-		/////////////////////
-		// jdb-search-path //
-		/////////////////////
-		table1_LB = new JLabel("Table 1:");
-		table1_LB.setBounds(10, 270, 150, 25);
-		gui.add(table1_LB);
-
-		table1_TF = new JTextField(20);
-		table1_TF.setBounds(110, 270, 165, 25);
-		gui.add(table1_TF);
-
-		table2_LB = new JLabel("Table 2:");
-		table2_LB.setBounds(10, 300, 150, 25);
-		gui.add(table2_LB);
-
-		table2_TF = new JTextField(20);
-		table2_TF.setBounds(110, 300, 165, 25);
-		gui.add(table2_TF);
-
-		// Button for show one or more columns from specific table
-		searchPath = new JButton ("Search Path");
-		searchPath.setBounds(10, 330, 200, 25);
-		searchPath.addMouseListener(new GUIInterface());
-		gui.add(searchPath);
-
-		searchPath_LB = new JLabel("Result:");
-		searchPath_LB.setBounds(10, 360, 150, 25);
-		gui.add(searchPath_LB);
-
-		searchPathResult = new JLabel("");
-		searchPathResult.setBounds(110, 360, 500, 25);
-		gui.add(searchPathResult);
+		locateStore_TF.setBounds(770, 10, 200, 25);
+		card.add(locateStore_TF);
 		
+		locateStore = new JButton("jdb-locate-store");
+		locateStore.setBounds(700, 40, 150, 25);
+		locateStore.addMouseListener(new GUIInterface());
+		card.add(locateStore);
+    	
+ /*--------------------------2nd column start-----------------------------------------*/
+    	
 		////////////////////////////
 		//  jdb-search-and-join   //
 		////////////////////////////
 		sj_table1_LB = new JLabel("Table 1:");
-		sj_table1_LB.setBounds(450, 10, 200, 25);
-		gui.add(sj_table1_LB);
-		
-		sj_table1_TF = new JTextField(20);
-		sj_table1_TF.setBounds(525, 10, 165, 25);
-		gui.add(sj_table1_TF);
-		
+		sj_table1_LB.setBounds(400, 10, 200, 25);
+		card.add(sj_table1_LB);
+		sj_table1_TF = new JTextField("address");
+		sj_table1_TF.setBounds(475, 10, 165, 25);
+		card.add(sj_table1_TF);
 		sj_table2_LB = new JLabel("Table 2:");
-		sj_table2_LB.setBounds(450, 40, 150, 25);
-		gui.add(sj_table2_LB);
+		sj_table2_LB.setBounds(400, 40, 150, 25);
+		card.add(sj_table2_LB);
+		sj_table2_TF = new JTextField("vendor");
+		sj_table2_TF.setBounds(475, 40, 165, 25);
+		card.add(sj_table2_TF);
 		
-		sj_table2_TF = new JTextField(20);
-		sj_table2_TF.setBounds(525, 40, 165, 25);
-		gui.add(sj_table2_TF);
-		
-		// Button for show one or more columns from specific table
 		search_and_join = new JButton ("Search and Join");
-		search_and_join.setBounds(450, 70, 200, 25);
+		search_and_join.setBounds(400, 70, 200, 25);
 		search_and_join.addMouseListener(new GUIInterface());
-		gui.add(search_and_join);
+		card.add(search_and_join);
 		
 		////////////////////////////
 		//    jdb-get-schedule    //
 		////////////////////////////
 		getSchedule_LB = new JLabel("Purchase order ID:");
-		getSchedule_LB.setBounds(450, 100, 200, 25);
-		gui.add(getSchedule_LB);
+		getSchedule_LB.setBounds(400, 100, 150, 25);
+		card.add(getSchedule_LB);
 		
-		getSchedule_TF = new JTextField(20);
-		getSchedule_TF.setBounds(525, 100, 165, 25);
-		gui.add(getSchedule_TF);
+		getSchedule_TF = new JTextField("5");
+		getSchedule_TF.setBounds(515, 100, 165, 25);
+		card.add(getSchedule_TF);
 		
 		getSchedule = new JButton ("jdb-get-schedule");
-		getSchedule.setBounds(450, 130, 200, 25);
+		getSchedule.setBounds(400, 130, 200, 25);
 		getSchedule.addMouseListener(new GUIInterface());
-		gui.add(getSchedule);
+		card.add(getSchedule);
 		
 		getSchedule_LB = new JLabel("Result:");
-		getSchedule_LB.setBounds(450, 160, 150, 25);
-		gui.add(getSchedule_LB);
-
+		getSchedule_LB.setBounds(400, 160, 150, 25);
+		card.add(getSchedule_LB);
+		
 		getScheduleResult = new JLabel("");
-		getScheduleResult.setBounds(450, 190, 500, 25);
-		gui.add(getScheduleResult);
-
-		/////////////////////////////
-		// jdb-show-related-tables //
-		/////////////////////////////
-		relatedTables_LB = new JLabel("Enter table name:");
-		relatedTables_LB.setBounds(10, 390, 200, 25);
-		gui.add(relatedTables_LB);
-
-		relatedTables_TF = new JTextField("table");
-		relatedTables_TF.setBounds(110, 390, 200, 25);
-		gui.add(relatedTables_TF);
-
-		relatedTables = new JButton("jdb-show-related-tabels");
-		relatedTables.setBounds(10, 420, 200, 25);
-		relatedTables.addMouseListener(new GUIInterface());
-		gui.add(relatedTables);
-
-	
-		/////////////////////////////
-		//jdb-show-all-primary-keys//
-		/////////////////////////////
-		primaryKey = new JButton("jdb-show-all-primary-keys");
-		primaryKey.setBounds(10, 450, 200, 25);
-		primaryKey.addMouseListener(new GUIInterface());
-		gui.add(primaryKey);
-
-		////////////////
-		//jdb-get-view//
-		////////////////
-		view_LB = new JLabel("Create a view:");
-		view_LB.setBounds(10, 480, 100, 25);
-
-		viewName_TF = new JTextField("name");
-		viewName_TF.setBounds(115, 480, 50, 25);
-
-		viewQuery_TF = new JTextField("query");
-		viewQuery_TF.setBounds(170, 480, 100, 25);
-
-		getView = new JButton("jdb-get-view");
-		getView.setBounds(10, 510, 200, 25);
-		getView.addMouseListener(new GUIInterface());
-
-		gui.add(getView);
-		gui.add(view_LB);
-		gui.add(viewName_TF);
-		gui.add(viewQuery_TF);
-		
-		////////////////
-		//  jdb-stat  //
-		////////////////
-		stat_LB = new JLabel("jdb-stat:");
-		stat_LB.setBounds(300, 480, 70, 25);
-	
-		statName_TF = new JTextField("View or Table Name");
-		statName_TF.setBounds(375, 480, 150, 25);
-
-		colName_TF = new JTextField("Column Name");
-		colName_TF.setBounds(530, 480, 110, 25);
-		
-		getStat = new JButton("jdb-stat");
-		getStat.setBounds(300, 510, 200, 25);
-		getStat.addMouseListener(new GUIInterface());
-//        dataset = new HistogramDataset();
-//        chart = createChart(dataset, );
-		gui.add(getStat);
-		gui.add(stat_LB);
-		gui.add(statName_TF);
-		gui.add(colName_TF);
-
-
-		////////////////////////////
-		//    jdb-get-addresses   //
-		////////////////////////////
-		getAddresses_LB = new JLabel("Name of table and range:");
-		getAddresses_LB.setBounds(10, 540, 200, 25);
-		gui.add(getAddresses_LB);
-
-		getAddresses_TF = new JTextField("Table");
-		getAddresses_TF.setBounds(150, 540, 100, 25);
-		gui.add(getAddresses_TF);
-		
-		getAddresses_TF2 = new JTextField("Range (1 = 0-4999)");
-		getAddresses_TF2.setBounds(250, 540, 110, 25);
-		gui.add(getAddresses_TF2);
-
-		getAddresses = new JButton("jdb-get-addresses");
-		getAddresses.setBounds(10, 570, 200, 25);
-		getAddresses.addMouseListener(new GUIInterface());
-		gui.add(getAddresses);
-
-		////////////////////////////
-		//  jdb-get-region-info   //
-		////////////////////////////
-		getRegion_LB = new JLabel("Enter Region and range:");
-		getRegion_LB.setBounds(10, 600, 200, 25);
-		gui.add(getRegion_LB);
-
-		getRegion_TF = new JTextField("Region");
-		getRegion_TF.setBounds(150, 600, 100, 25);
-		gui.add(getRegion_TF);
-		
-		getRegion_TF2 = new JTextField("Range (1 = 0-4999)");
-		getRegion_TF2.setBounds(250, 600, 110, 25);
-		gui.add(getRegion_TF2);
-
-		getRegion = new JButton("jdb-get-region-info");
-		getRegion.setBounds(10, 630, 200, 25);
-		getRegion.addMouseListener(new GUIInterface());
-		gui.add(getRegion);
-
-		////////////////////////////
-		//  jdb-get-info-by-name  //
-		////////////////////////////
-		getInfo_LB = new JLabel("Enter table and attribute name:");
-		getInfo_LB.setBounds(10, 660, 200, 25);
-		gui.add(getInfo_LB);
-
-		getInfo_tableTF = new JTextField("table");
-		getInfo_tableTF.setBounds(150, 660, 100, 25);
-		gui.add(getInfo_tableTF);
-
-		getInfo_attributeTF = new JTextField("name");
-		getInfo_attributeTF.setBounds(250, 660, 200, 25);
-		gui.add(getInfo_attributeTF);
-
-		getInfo = new JButton("jdb-get-info-by-name");
-		getInfo.setBounds(10, 690, 200, 25);
-		getInfo.addMouseListener(new GUIInterface());
-		gui.add(getInfo);
-		
-		////////////////////////////
-		//  Join up to 4 tables   //
-		////////////////////////////	
-		joinTables_LB = new JLabel("Table names and keys:");
-		joinTables_LB.setBounds(10, 720, 100, 25);
-		gui.add(joinTables_LB);
-		
-		joinTables_t1k1TF = new JTextField("product ProductID");
-		joinTables_t1k1TF.setBounds(110, 720, 135, 25);
-		gui.add(joinTables_t1k1TF);
-
-		joinTables_t2k2TF = new JTextField("productvendor VendorID");
-		joinTables_t2k2TF.setBounds(245, 720, 135, 25);
-		gui.add(joinTables_t2k2TF);
-		
-		joinTables_t3k3TF = new JTextField("vendor VendorID");
-		joinTables_t3k3TF.setBounds(380, 720, 135, 25);
-		gui.add(joinTables_t3k3TF);
-
-		joinTables_t4TF = new JTextField("vendorcontact");
-		joinTables_t4TF.setBounds(515, 720, 100, 25);
-		gui.add(joinTables_t4TF);
-		
-		joinTables = new JButton("Show results of joining up to 4 tables");
-		joinTables.setBounds(10, 750, 200, 25);
-		joinTables.addMouseListener(new GUIInterface());
-		gui.add(joinTables);
+		getScheduleResult.setBounds(400, 190, 500, 25);
+		card.add(getScheduleResult);
 		
 		////////////////////////////
 		//     jdb-plot-schema    //
 		////////////////////////////	
 		plotSchema = new JButton("jdb-plot-schema");
-		plotSchema.setBounds(450, 250, 150, 25);
+		plotSchema.setBounds(400, 225, 150, 25);
 		plotSchema.addMouseListener(new GUIInterface());
-		gui.add(plotSchema);
+		card.add(plotSchema);
+				
+		/////////////////////////////
+		// Process Raw SQL queries //
+		/////////////////////////////
+		query_LB = new JLabel("SQL query input:");
+		query_LB.setBounds(400, 260, 150, 25);
+		card.add(query_LB);
+		query_TF = new JTextField("SELECT * FROM employeepayhistory;");
+		query_TF.setBounds(500, 260, 265, 25);
+		card.add(query_TF);
+		query = new JButton ("Raw SQL Query");
+		query.setBounds(400, 290, 200, 25);
+		query.addMouseListener(new GUIInterface());
+		card.add(query);
+		
+		////////////////
+		//  jdb-stat  //
+		////////////////
+		stat_LB = new JLabel("jdb-stat:");
+		stat_LB.setBounds(400, 325, 70, 25);
+	
+		statName_TF = new JTextField("employeepayhistory");
+		statName_TF.setBounds(475, 325, 150, 25);
+	
+		colName_TF = new JTextField("Rate");
+		colName_TF.setBounds(630, 325, 110, 25);
+		
+		getStat = new JButton("jdb-stat");
+		getStat.setBounds(400, 355, 200, 25);
+		getStat.addMouseListener(new GUIInterface());
+		card.add(getStat);
+		card.add(stat_LB);
+		card.add(statName_TF);
+		card.add(colName_TF);
 		
 		////////////////////////////
-		//    jdb-locate-store    //
+		//  Join up to 4 tables   //
 		////////////////////////////	
-		locateStore_TF = new JTextField("Enter ProductID");
-		locateStore_TF.setBounds(450, 280, 200, 25);
-		gui.add(locateStore_TF);
+		joinTables_LB = new JLabel("Table names and keys:");
+		joinTables_LB.setBounds(400, 390, 200, 25);
+		card.add(joinTables_LB);
 		
-		locateStore = new JButton("jdb-locate-store");
-		locateStore.setBounds(450, 310, 150, 25);
-		locateStore.addMouseListener(new GUIInterface());
-		gui.add(locateStore);
+		joinTables_t1k1TF = new JTextField("product ProductID");
+		joinTables_t1k1TF.setBounds(505, 420, 135, 25);
+		card.add(joinTables_t1k1TF);
 
-		//JTable table = new JTable();
-		frame.setVisible(true);
-		gui.revalidate();
-		gui.repaint();
+		joinTables_t2k2TF = new JTextField("productvendor VendorID");
+		joinTables_t2k2TF.setBounds(505, 450, 135, 25);
+		card.add(joinTables_t2k2TF);
 		
-		
-		
-		///////////End of Commands/////////////
+		joinTables_t3k3TF = new JTextField("vendor VendorID");
+		joinTables_t3k3TF.setBounds(505, 480, 135, 25);
+		card.add(joinTables_t3k3TF);
 
-		frame.setVisible(true);
+		joinTables_t4TF = new JTextField("vendorcontact");
+		joinTables_t4TF.setBounds(505, 510, 100, 25);
+		card.add(joinTables_t4TF);
 		
+		joinTables = new JButton("Show results of joining up to 4 tables");
+		joinTables.setBounds(505, 540, 200, 25);
+		joinTables.addMouseListener(new GUIInterface());
+		card.add(joinTables);
+		
+		////////////////////////////
+		//  jdb-get-info-by-name  //
+		////////////////////////////
+		getInfo_LB = new JLabel("Table Name & Attribute Name:");
+		getInfo_LB.setBounds(400, 575, 200, 25);
+		card.add(getInfo_LB);
+		
+		getInfo_tableTF = new JTextField("product");
+		getInfo_tableTF.setBounds(590, 575, 100, 25);
+		card.add(getInfo_tableTF);
+		
+		getInfo_attributeTF = new JTextField("Adjustable Race");
+		getInfo_attributeTF.setBounds(690, 575, 100, 25);
+		card.add(getInfo_attributeTF);
+		
+		getInfo = new JButton("jdb-get-info-by-name");
+		getInfo.setBounds(400, 605, 200, 25);
+		getInfo.addMouseListener(new GUIInterface());
+		card.add(getInfo);
+			
+		
+/*--------------------------1st column start-----------------------------------------*/
+				
+		/////////////////////
+		// jdb-list-tables //
+		/////////////////////
+		listTables = new JButton("Show List of Tables");
+		listTables.setBounds(5, 20, 200, 25);
+		listTables.addMouseListener(new GUIInterface());
+		card.add(listTables);
+		
+		/////////////////////
+		// jdb-find-column //
+		/////////////////////
+		fcLB = new JLabel("Column Name:");
+		fcLB.setBounds(10, 60, 150, 25);
+		card.add(fcLB);
+		fcTF = new JTextField("ProductID");
+		fcTF.setBounds(110, 60, 165, 25);
+		card.add(fcTF);
+		findColumn = new JButton("jdb-find-column");
+		findColumn.setBounds(10, 90, 200, 25);
+		findColumn.addMouseListener(new GUIInterface());
+		card.add(findColumn);
+		
+		/////////////////////////////////////////////////
+		// Show one or more columns for specific table //
+		/////////////////////////////////////////////////
+		columns_LB = new JLabel("Column Name:");
+		columns_LB.setBounds(10, 125, 150, 25);
+		card.add(columns_LB);
+		columns_TF = new JTextField("VendorID, AccountNumber, Name");
+		columns_TF.setBounds(110, 125, 165, 25);
+		card.add(columns_TF);
+		table_LB = new JLabel("Table Name:");
+		table_LB.setBounds(10, 155, 150, 25);
+		card.add(table_LB);
+		table_TF = new JTextField("vendor");
+		table_TF.setBounds(110, 155, 165, 25);
+		card.add(table_TF);
+		
+		showColumns = new JButton ("Show one or more Columns of Specific Table");
+		showColumns.setBounds(10, 185, 200, 25);
+		showColumns.addMouseListener(new GUIInterface());
+		card.add(showColumns);
 
+		/////////////////////
+		// jdb-search-path //
+		/////////////////////
+		table1_LB = new JLabel("Table 1:");
+		table1_LB.setBounds(10, 220, 150, 25);
+		card.add(table1_LB);
+		table1_TF = new JTextField("customer");
+		table1_TF.setBounds(110, 220, 165, 25);
+		card.add(table1_TF);
+		table2_LB = new JLabel("Table 2:");
+		table2_LB.setBounds(10, 250, 150, 25);
+		card.add(table2_LB);
+		table2_TF = new JTextField("vendor");
+		table2_TF.setBounds(110, 250, 165, 25);
+		card.add(table2_TF);
+
+		searchPath = new JButton ("Search Path");
+		searchPath.setBounds(10, 280, 200, 25);
+		searchPath.addMouseListener(new GUIInterface());
+		card.add(searchPath);
+		searchPath_LB = new JLabel("Result:");
+		searchPath_LB.setBounds(10, 310, 70, 25);
+		card.add(searchPath_LB);
+		searchPathResult = new JLabel("");
+		searchPathResult.setBounds(60, 310, 500, 25);
+		card.add(searchPathResult);
+		
+		/////////////////////////////
+		// jdb-show-related-tables //
+		/////////////////////////////
+		relatedTables_LB = new JLabel("Table name: ");
+		relatedTables_LB.setBounds(10, 345, 150, 25);
+		card.add(relatedTables_LB);
+		relatedTables_TF = new JTextField("product");
+		relatedTables_TF.setBounds(110, 345, 160, 25);
+		card.add(relatedTables_TF);
+		relatedTables = new JButton("jdb-show-related-tabels");
+		relatedTables.setBounds(10, 375, 200, 25);
+		relatedTables.addMouseListener(new GUIInterface());
+		card.add(relatedTables);
+
+		/////////////////////////////
+		//jdb-show-all-primary-keys//
+		/////////////////////////////
+		primaryKey = new JButton("jdb-show-all-primary-keys");
+		primaryKey.setBounds(10, 410, 200, 25);
+		primaryKey.addMouseListener(new GUIInterface());
+		card.add(primaryKey);
+
+		////////////////
+		//jdb-get-view//
+		////////////////
+		view_LB = new JLabel("jdb-get-view:");
+		view_LB.setBounds(10, 450, 100, 25);
+		viewName_TF = new JTextField("(name)");
+		viewName_TF.setBounds(115, 450, 50, 25);
+		viewQuery_TF = new JTextField("select * from employee;");
+		viewQuery_TF.setBounds(170, 450, 100, 25);
+		getView = new JButton("jdb-get-view");
+		getView.setBounds(10, 480, 200, 25);
+		getView.addMouseListener(new GUIInterface());
+		card.add(getView);
+		card.add(view_LB);
+		card.add(viewName_TF);
+		card.add(viewQuery_TF);
+
+		////////////////////////////
+		//    jdb-get-addresses   //
+		////////////////////////////
+		getAddresses_LB = new JLabel("Table Name & Range:");
+		getAddresses_LB.setBounds(10, 515, 200, 25);
+		card.add(getAddresses_LB);
+
+		getAddresses_TF = new JTextField("address");
+		getAddresses_TF.setBounds(150, 515, 80, 25);
+		card.add(getAddresses_TF);
+		
+		getAddresses_TF2 = new JTextField("Range (1 = 0-4999)");
+		getAddresses_TF2.setBounds(230, 515, 140, 25);
+		card.add(getAddresses_TF2);
+
+		getAddresses = new JButton("jdb-get-addresses");
+		getAddresses.setBounds(10, 545, 200, 25);
+		getAddresses.addMouseListener(new GUIInterface());
+		card.add(getAddresses);
+
+		////////////////////////////
+		//  jdb-get-region-info   //
+		////////////////////////////
+		getRegion_LB = new JLabel("Region & Range:");
+		getRegion_LB.setBounds(10, 585, 200, 25);
+		card.add(getRegion_LB);
+
+		getRegion_TF = new JTextField("US");
+		getRegion_TF.setBounds(150, 585, 80, 25);
+		card.add(getRegion_TF);
+		
+		getRegion_TF2 = new JTextField("Range (1 = 0-4999)");
+		getRegion_TF2.setBounds(230, 585, 140, 25);
+		card.add(getRegion_TF2);
+
+		getRegion = new JButton("jdb-get-region-info");
+		getRegion.setBounds(10, 615, 200, 25);
+		getRegion.addMouseListener(new GUIInterface());
+		card.add(getRegion);
+    }
+	
+	public static void main(String[]args) {
+		 /* Use an appropriate Look and Feel */
+        try {
+            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+        } catch (UnsupportedLookAndFeelException ex) {
+            ex.printStackTrace();
+        } catch (IllegalAccessException ex) {
+            ex.printStackTrace();
+        } catch (InstantiationException ex) {
+            ex.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        /* Turn off metal's use of bold fonts */
+        UIManager.put("swing.boldMetal", Boolean.FALSE);
+         
+        //Schedule a job for the event dispatch thread:
+        //creating and showing this application's GUI.
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+            	DatabaseManager.openConnection();
+        		DatabaseManager.queryDatabase("use adventureworks;");
+                createAndShowGUI();
+            }
+        });
 	} //This escapes "static-ness" of main
 
 	//Could make listeners frame-synchronized or based on press & release combo
@@ -537,35 +577,78 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 	@Override
 	public void mouseClicked(MouseEvent mouse) {
-
-//		DatabaseManager.openConnection();
-//		DatabaseManager.queryDatabase("use adventureworks;");
-
+		
+		////////////////////////////
+		//    jdb-locate-store    //
+		////////////////////////////
+		if (mouse.getSource() == locateStore) {
+			JFrame frame = new JFrame();
+			frame.setVisible(true);
+			GUIInterface panel = new GUIInterface();
+			DefaultTableModel model = new DefaultTableModel();
+			frame.setSize(800, 600);
+			frame.add(panel);
+			frame.setLocationRelativeTo(null);
+			
+			JTable table = new JTable(model);
+			table.setShowGrid(true);
+			table.setGridColor(Color.black);
+			JScrollPane sp = new JScrollPane(table);
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			sp.setPreferredSize(new Dimension(600, 550));
+			
+			String productID = locateStore_TF.getText();
+			System.out.println("Entered productID: " + productID);
+			//int rangenum = Integer.parseInt(range);
+			String output = DatabaseManager.handleCustomCommand("jdb-locate-store " + productID);
+			String line[] = output.split("\n");
+			System.out.println(output);
+		
+			// add column names
+			model.addColumn("Name");
+			
+			// add rows data
+			//String
+			for (String token : line) {
+				if (token.length() > 1) {
+					token = token.replace("{", "");
+					token = token.replace("}", "");
+				
+					String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
+					List<String> single_row = new ArrayList<String>();
+					for (String rowToken : row) {
+						String elem[] = rowToken.split("=");
+						if (elem.length > 1)
+							single_row.add(elem[1]);
+						else
+							single_row.add(elem[0]);
+					}
+					model.addRow(single_row.toArray());
+				}
+			}
+			panel.add(sp);
+		}
 		/////////////////////////////////
 		// Handler for jdb-find-column //
 		/////////////////////////////////
-		if (mouse.getSource() == findColumn) { // jdb-find-column
-//
-
+		else if (mouse.getSource() == findColumn) { // jdb-find-column
 			JFrame frame_find_column = new JFrame();
 			GUIInterface panel_find_column = new GUIInterface();
 			frame_find_column.setVisible(true);
 			DefaultTableModel model1 = new DefaultTableModel();
 
-
 			JTable table1 = new JTable(model1);
-//			table1.setBounds(5, 5, 100, 300);
 			table1.setShowGrid(true);
 			table1.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table1);
-			sp.setPreferredSize(new Dimension(250, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 			model1.addColumn("Table Name");
-//			model1.addColumn("Column");
 
 			frame_find_column.add(panel_find_column);
-			frame_find_column.setSize(300, 300);
+			frame_find_column.setSize(800, 600);
+			frame_find_column.setLocationRelativeTo(null);
 
-			String column_name = textfield1.getText();
+			String column_name = fcTF.getText();
 			String output1 = DatabaseManager.handleCustomCommand("jdb-find-column " + column_name);
 			String line[] = output1.split("\n");
 			for (String token : line) {
@@ -574,10 +657,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 			}
 			table1.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel_find_column.add(sp);
-
-//			DatabaseManager.closeConnection();
 		}
 
 		/////////////////////////////////////
@@ -592,16 +672,15 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 
 			JTable table = new JTable(model);
-//			table1.setBounds(5, 5, 100, 300);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(250, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 			model.addColumn("Table Name");
-//			model1.addColumn("Column");
 
 			frame_list_tables.add(panel_list_tables);
-			frame_list_tables.setSize(300, 300);
+			frame_list_tables.setSize(800, 600);
+			frame_list_tables.setLocationRelativeTo(null);
 
 			String output2 = DatabaseManager.handleSQLCommand("show tables;");
 			String line[] = output2.split("\n");
@@ -612,10 +691,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 			}
 			table.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel_list_tables.add(sp);
-
-
 		}
 		////////////////////////////////////////////////////////////
 		// Handler for show one or more columns of specific table //
@@ -628,16 +704,14 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 
 			JTable table = new JTable(model);
-//			table.setBounds(5, 5, 100, 300);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(250, 300));
-
-//			model1.addColumn("Column");
+			sp.setPreferredSize(new Dimension(600, 550));
 
 			frame_columns_table.add(panel_show_column);
-			frame_columns_table.setSize(300, 300);
+			frame_columns_table.setSize(800, 600);
+			frame_columns_table.setLocationRelativeTo(null);
 
 			String columnName = columns_TF.getText();
 			String tableName = table_TF.getText();
@@ -647,25 +721,25 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				model.addColumn(token.trim());
 			}
 
-
 			String output = DatabaseManager.handleSQLCommand("select " + columnName + " from " + tableName + ";");
+			System.out.println(columnName);
 			String line[] = output.split("\n");
 			for (String token : line) {
 				token = token.replace("{", "");
 				token = token.replace("}", "");
+				System.out.println(token);
 				String row[] = token.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					String elem[] = rowToken.split("=");
-					single_row.add(elem[1]);
+					if(rowToken.indexOf("=")!=-1){
+						String elem[] = rowToken.split("=");
+						single_row.add(elem[1]);
+					}
 				}
 				model.addRow(single_row.toArray());
 
 			}
-//			table.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel_show_column.add(sp);
-
 		}
 		/////////////////////////////
 		// Process Raw SQL queries //
@@ -676,27 +750,17 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			DefaultTableModel model = new DefaultTableModel();
 
-
 			JTable table = new JTable(model);
-//			table.setBounds(5, 5, 100, 300);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(250, 300));
-
-//			model1.addColumn("Column");
+			sp.setPreferredSize(new Dimension(700, 550));
 
 			frame.add(panel);
-			frame.setSize(300, 300);
+			frame.setSize(800, 600);
+			frame.setLocationRelativeTo(null);
 
 			String sqlQuery = query_TF.getText();
-
-//			String columnList[] = columnName.split(",");
-//			for (String token : columnList) {
-//				model.addColumn(token.trim());
-//			}
-
-
 			String output = DatabaseManager.handleSQLCommand(sqlQuery);
 			String line[] = output.split("\n");
 
@@ -729,8 +793,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				model.addRow(single_row.toArray());
 
 			}
-//			table.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel.add(sp);
 		}
 		/////////////////////
@@ -753,16 +815,14 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			DefaultTableModel model = new DefaultTableModel();
 			
 			JTable table = new JTable(model);
-//			table1.setBounds(5, 5, 100, 300);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(1600,800));
-			
-//			model1.addColumn("Column");
+			sp.setPreferredSize(new Dimension(700,550));
 			
 			frame.add(panel);
-			frame.setSize(300, 300);
+			frame.setSize(800, 600);
+			frame.setLocationRelativeTo(null);
 
 			String tableName1 = sj_table1_TF.getText();
 			String tableName2 = sj_table2_TF.getText();
@@ -776,15 +836,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 			
 			for (String token : firstRow) {
-				//if (!token .equals (firstRow[0])) {
-					String elem[] = token.split("=");
-					if (elem.length > 1)
-						model.addColumn(elem[0]);
-				//}
+				String elem[] = token.split("=");
+				if (elem.length > 1)
+					model.addColumn(elem[0]);
 			}
-			
 			for (String token : line) {
-				// model.addRow(new Object[] {token});
 				token = token.replace("{", "");
 				token = token.replace("}", "");
 				String[] row = token.split(",");
@@ -798,13 +854,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 					catch (Exception e){
 						;
 					}
-					// System.out.println(row[i]);
 				}
 				model.addRow(row);
 				
 			}
 			table.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel.add(sp);
 		}
 		
@@ -817,8 +871,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			output = output.substring(0, output.length() - 3);
 			getScheduleResult.setText(output);
 		}
-		
-		
 		/////////////////////////////
 		// jdb-show-related-tables //
 		/////////////////////////////
@@ -830,16 +882,15 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 
 			JTable table = new JTable(model);
-//			table1.setBounds(5, 5, 100, 300);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(250, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 			model.addColumn("Table Name");
-//			model1.addColumn("Column");
 
 			frame.add(panel);
-			frame.setSize(300, 300);
+			frame.setSize(800, 600);
+			frame.setLocationRelativeTo(null);
 
 			String tableName = relatedTables_TF.getText();
 			String output = DatabaseManager.handleCustomCommand("jdb-show-related-tables " + tableName);
@@ -849,10 +900,8 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 
 			}
 			table.getColumnModel().getColumn(0).setPreferredWidth(200);
-//			System.out.println(output1);
 			panel.add(sp);
 		}
-
 		/////////////////////////////
 		//jdb-show-all-primary-keys//
 		/////////////////////////////
@@ -861,15 +910,15 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
-
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-			sp.setPreferredSize(new Dimension(450, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 			model.addColumn("Table Name");
 			model.addColumn("Primary Key");
 
@@ -892,16 +941,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
 			frame.setTitle(viewName_TF.getText());
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
-//			sp.setPreferredSize(new Dimension(450, 300));
-
+			
 			String tableName = table1_TF.getText();
 			String output = DatabaseManager.handleCustomCommand("jdb-get-view "+viewName_TF.getText()+" ( "+viewQuery_TF.getText() +"; )");
 			String line[] = output.split("\n");
@@ -976,10 +1025,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 	        chartPanel.setMouseZoomable(true, false);
 	        chartPanel.setBounds(0, 0, 500, 300);
 	   
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
 			frame.setTitle(viewName_TF.getText());
 			frame.setResizable(false);
+			frame.setLocationRelativeTo(null);
 
 			panel.add(chartPanel);
 			JLabel min_LB = new JLabel("min = "+min);
@@ -1009,15 +1059,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			sp.setPreferredSize(new Dimension(500, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 
 			String tableName = getAddresses_TF.getText();
 			String range = getAddresses_TF2.getText();
@@ -1064,15 +1115,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			sp.setPreferredSize(new Dimension(500, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 
 			String regionName = getRegion_TF.getText();
 			String range = getRegion_TF2.getText();
@@ -1119,31 +1171,29 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			sp.setPreferredSize(new Dimension(500, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 
 			String tableName = getInfo_tableTF.getText();
 			String attributeName = getInfo_attributeTF.getText();
 			String output = DatabaseManager.handleCustomCommand("jdb-get-info-by-name " +  tableName + " " + attributeName);
 			String line[] = output.split("\n");
-			//System.out.println(line.length);
 
 			// add column names
 			String firstLine = line[1];
-			//System.out.println(firstLine);
 			firstLine = firstLine.replace("{", "");
 			firstLine = firstLine.replace("}", "");
 			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 			for (String token : firstRow) {
 					String elem[] = token.split("=");
-					//System.out.println("ColumnName: " + elem[0]);
 					if (elem.length > 1)
 						model.addColumn(elem[0]);
 				}
@@ -1158,7 +1208,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					//System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
 					if (elem.length > 1)
 						single_row.add(elem[1]);
@@ -1176,15 +1225,16 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.setVisible(true);
 			GUIInterface panel = new GUIInterface();
 			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
+			frame.setSize(800, 600);
 			frame.add(panel);
+			frame.setLocationRelativeTo(null);
 
 			JTable table = new JTable(model);
 			table.setShowGrid(true);
 			table.setGridColor(Color.black);
 			JScrollPane sp = new JScrollPane(table);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			sp.setPreferredSize(new Dimension(500, 300));
+			sp.setPreferredSize(new Dimension(700, 550));
 			String t1k1 = joinTables_t1k1TF.getText();
 			String [] splitfieldt1k1 = t1k1.split(" ");
 			String t1 = splitfieldt1k1[0];
@@ -1218,7 +1268,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			}
  			String output = DatabaseManager.handleSQLCommand(query);
 			String line[] = output.split("\n");
-			//System.out.println(line.length);
 
 			// add column names
 			String firstLine = line[1];
@@ -1228,7 +1277,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			String firstRow[] = firstLine.split(","); //FIXME: not work for column has , in their data. can fix by split using regex
 			for (String token : firstRow) {
 					String elem[] = token.split("=");
-					//System.out.println("ColumnName: " + elem[0]);
 					if (elem.length > 1)
 						model.addColumn(elem[0]);
 				}
@@ -1243,7 +1291,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 				String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
 				List<String> single_row = new ArrayList<String>();
 				for (String rowToken : row) {
-					//System.out.println(rowToken);
 					String elem[] = rowToken.split("=");
 					if (elem.length > 1)
 						single_row.add(elem[1]);
@@ -1280,7 +1327,6 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 					splitResults = token.split(" ");
 					if (splitResults[0].length() > 0) {
 						dotpi.add(splitResults[0]);
-						//System.out.println("final loop: " + splitResults[0]);
 					}
 				}
 				String finalResult = "";
@@ -1313,7 +1359,7 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			File f;
 			found:
 			while (true) {
-				f = new File("external/schema.jpg");
+				f = new File("external/schema.png");
 				if (f.exists()) {
 					break found;
 				}
@@ -1329,62 +1375,11 @@ public class GUIInterface extends JPanel implements MouseListener, MouseWheelLis
 			frame.add(gui);
 			frame.setVisible(true);
 			frame.setSize(1200, 800);
+			frame.setLocationRelativeTo(null);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		////////////////////////////
-		//    jdb-locate-store    //
-		////////////////////////////
-		else if (mouse.getSource() == locateStore) {
-			JFrame frame = new JFrame();
-			frame.setVisible(true);
-			GUIInterface panel = new GUIInterface();
-			DefaultTableModel model = new DefaultTableModel();
-			frame.setSize(500, 350);
-			frame.add(panel);
-
-			JTable table = new JTable(model);
-			table.setShowGrid(true);
-			table.setGridColor(Color.black);
-			JScrollPane sp = new JScrollPane(table);
-			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			sp.setPreferredSize(new Dimension(500, 300));
-
-			String productID = locateStore_TF.getText();
-			//int rangenum = Integer.parseInt(range);
-			String output = DatabaseManager.handleCustomCommand("jdb-locate-store " + productID);
-			String line[] = output.split("\n");
-			
-			// add column names
-			model.addColumn("Name");
-
-			// add rows data
-			//String
-			for (String token : line) {
-				if (token.length() > 1) {
-					token = token.replace("{", "");
-					token = token.replace("}", "");
-
-					String row[] = token.split(",[a-zA-Z0-9 ]*[^,]*="); //FIXME: not work for column has , in their data. can fix by split using regex
-					List<String> single_row = new ArrayList<String>();
-					for (String rowToken : row) {
-						String elem[] = rowToken.split("=");
-						if (elem.length > 1)
-							single_row.add(elem[1]);
-						else
-							single_row.add(elem[0]);
-					}
-					model.addRow(single_row.toArray());
-				}
-			}
-			panel.add(sp);
-		}
-		//DatabaseManager.closeConnection();
-
-		
-		// DatabaseManager.closeConnection();
-
 	}
 
 	@Override

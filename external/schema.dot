@@ -1,0 +1,100 @@
+graph {
+address -- customeraddress -- employeeaddress -- vendoraddress
+addresstype -- customeraddress -- vendoraddress
+awbuildversion
+billofmaterials
+blah -- contact -- contactcreditcard -- employee -- individual -- salesorderheader -- storecontact -- vendorcontact
+blah -- contact -- contactcreditcard -- employee -- individual -- salesorderheader -- storecontact -- vendorcontact
+contactcreditcard -- creditcard -- salesorderheader
+contacttype -- storecontact -- vendorcontact
+countryregion -- countryregioncurrency -- salesterritory -- stateprovince
+countryregion -- countryregioncurrency -- salesterritory -- stateprovince
+countryregioncurrency -- currency
+contactcreditcard -- creditcard -- salesorderheader
+culture -- productmodelproductdescriptionculture
+countryregioncurrency -- currency
+currencyrate -- salesorderheader
+customer -- customeraddress -- individual -- salesorderheader -- store -- storecontact
+customer -- customeraddress -- individual -- salesorderheader -- store -- storecontact
+address -- customeraddress -- employeeaddress -- vendoraddress
+databaselog
+department -- employeedepartmenthistory
+document -- productdocument
+blah -- employee -- employeeaddress -- employeedepartmenthistory -- employeepayhistory -- jobcandidate -- purchaseorderheader
+blah -- employee -- employeeaddress -- employeedepartmenthistory -- employeepayhistory -- jobcandidate -- purchaseorderheader
+address -- customeraddress -- employeeaddress -- vendoraddress
+blah -- employee -- employeeaddress -- employeedepartmenthistory -- employeepayhistory -- jobcandidate -- purchaseorderheader
+department -- employeedepartmenthistory
+employeedepartmenthistory -- shift
+billofmaterials -- employeedepartmenthistory -- productcosthistory -- productlistpricehistory -- salesterritoryhistory -- specialoffer -- workorder
+blah -- employee -- employeeaddress -- employeedepartmenthistory -- employeepayhistory -- jobcandidate -- purchaseorderheader
+employeepayhistory
+errorlog
+illustration -- productmodelillustration
+customer -- customeraddress -- individual -- salesorderheader -- store -- storecontact
+jobcandidate
+location -- productinventory -- workorderrouting
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+productcategory -- productsubcategory
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+billofmaterials -- employeedepartmenthistory -- productcosthistory -- productlistpricehistory -- salesterritoryhistory -- specialoffer -- workorder
+productdescription -- productmodelproductdescriptionculture
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+document -- productdocument
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+location -- productinventory -- workorderrouting
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+billofmaterials -- employeedepartmenthistory -- productcosthistory -- productlistpricehistory -- salesterritoryhistory -- specialoffer -- workorder
+product -- productmodel -- productmodelillustration -- productmodelproductdescriptionculture
+product -- productmodel -- productmodelillustration -- productmodelproductdescriptionculture
+illustration -- productmodelillustration
+product -- productmodel -- productmodelillustration -- productmodelproductdescriptionculture
+productdescription -- productmodelproductdescriptionculture
+culture -- productmodelproductdescriptionculture
+productphoto -- productproductphoto
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+productphoto -- productproductphoto
+productreview
+product -- productsubcategory
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+productvendor -- purchaseorderheader -- vendor -- vendoraddress -- vendorcontact
+purchaseorderdetail -- purchaseorderheader
+purchaseorderdetail
+salesorderdetail -- salesorderheader -- salesorderheadersalesreason
+salesorderdetail
+salesorderdetail -- salesorderheader -- salesorderheadersalesreason
+salesorderdetail -- salesorderheader -- salesorderheadersalesreason
+salesorderheadersalesreason -- salesreason
+salesorderheader -- salesperson -- salespersonquotahistory -- salesterritoryhistory -- store
+salesorderheader -- salesperson -- salespersonquotahistory -- salesterritoryhistory -- store
+salespersonquotahistory
+salesorderheadersalesreason -- salesreason
+salestaxrate
+customer -- salesorderheader -- salesperson -- salesterritory -- salesterritoryhistory -- stateprovince
+salesorderheader -- salesperson -- salespersonquotahistory -- salesterritoryhistory -- store
+customer -- salesorderheader -- salesperson -- salesterritory -- salesterritoryhistory -- stateprovince
+billofmaterials -- employeedepartmenthistory -- productcosthistory -- productlistpricehistory -- salesterritoryhistory -- specialoffer -- workorder
+scrapreason -- workorder
+employeedepartmenthistory -- shift
+purchaseorderheader -- salesorderheader -- shipmethod
+shoppingcartitem
+salesorderdetail -- specialoffer -- specialofferproduct
+salesorderdetail -- specialoffer -- specialofferproduct
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+address -- salestaxrate -- stateprovince
+customer -- customeraddress -- individual -- salesorderheader -- store -- storecontact
+customer -- customeraddress -- individual -- salesorderheader -- store -- storecontact
+blah -- contact -- contactcreditcard -- employee -- individual -- salesorderheader -- storecontact -- vendorcontact
+transactionhistory -- transactionhistoryarchive
+transactionhistory -- transactionhistoryarchive
+billofmaterials -- productvendor -- unitmeasure
+productvendor -- purchaseorderheader -- vendor -- vendoraddress -- vendorcontact
+productvendor -- purchaseorderheader -- vendor -- vendoraddress -- vendorcontact
+address -- customeraddress -- employeeaddress -- vendoraddress
+productvendor -- purchaseorderheader -- vendor -- vendoraddress -- vendorcontact
+blah -- contact -- contactcreditcard -- employee -- individual -- salesorderheader -- storecontact -- vendorcontact
+workorder -- workorderrouting
+workorder -- workorderrouting
+product -- productcosthistory -- productdocument -- productinventory -- productlistpricehistory -- productproductphoto -- productreview -- productvendor -- purchaseorderdetail -- salesorderdetail -- shoppingcartitem -- specialofferproduct -- transactionhistory -- transactionhistoryarchive -- workorder -- workorderrouting
+workorderrouting
+}
